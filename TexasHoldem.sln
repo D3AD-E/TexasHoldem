@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30503.244
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TexasHoldem", "TexasHoldem.csproj", "{7FAD135C-5F98-4E18-AEFC-6104730D1BF4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TexasHoldem.Client", "TexasHoldem.Client\TexasHoldem.Client.csproj", "{74DFEA37-FCF7-4CE3-9B22-B79A1EB04188}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TexasHoldem.CommonAssembly", "TexasHoldem.CommonAssembly\TexasHoldem.CommonAssembly.csproj", "{E95C59D8-C796-40A6-8DEA-794A56A394D0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TexasHoldem.Server", "TexasHoldem.Server\TexasHoldem.Server.csproj", "{104B4A97-8C97-4DE2-B034-E260279C56D2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TexasHoldem.Server.DAL", "TexasHoldem.Server.DAL\TexasHoldem.Server.DAL.csproj", "{55C5C175-77FA-44FE-8DDE-CAC8EF55759C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TexasHoldem.Server.DAL.Migrations", "TexasHoldem.Server.DAL.Migrations\TexasHoldem.Server.DAL.Migrations.csproj", "{CF15E3AB-5325-4CCF-8752-24503C010DAB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7FAD135C-5F98-4E18-AEFC-6104730D1BF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7FAD135C-5F98-4E18-AEFC-6104730D1BF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7FAD135C-5F98-4E18-AEFC-6104730D1BF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7FAD135C-5F98-4E18-AEFC-6104730D1BF4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{74DFEA37-FCF7-4CE3-9B22-B79A1EB04188}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74DFEA37-FCF7-4CE3-9B22-B79A1EB04188}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74DFEA37-FCF7-4CE3-9B22-B79A1EB04188}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74DFEA37-FCF7-4CE3-9B22-B79A1EB04188}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E95C59D8-C796-40A6-8DEA-794A56A394D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E95C59D8-C796-40A6-8DEA-794A56A394D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E95C59D8-C796-40A6-8DEA-794A56A394D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E95C59D8-C796-40A6-8DEA-794A56A394D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{104B4A97-8C97-4DE2-B034-E260279C56D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{104B4A97-8C97-4DE2-B034-E260279C56D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{104B4A97-8C97-4DE2-B034-E260279C56D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{104B4A97-8C97-4DE2-B034-E260279C56D2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55C5C175-77FA-44FE-8DDE-CAC8EF55759C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55C5C175-77FA-44FE-8DDE-CAC8EF55759C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55C5C175-77FA-44FE-8DDE-CAC8EF55759C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55C5C175-77FA-44FE-8DDE-CAC8EF55759C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF15E3AB-5325-4CCF-8752-24503C010DAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF15E3AB-5325-4CCF-8752-24503C010DAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF15E3AB-5325-4CCF-8752-24503C010DAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF15E3AB-5325-4CCF-8752-24503C010DAB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {550A1381-5A7F-492B-A49F-45FDBD070AEC}
+	EndGlobalSection
+EndGlobal
