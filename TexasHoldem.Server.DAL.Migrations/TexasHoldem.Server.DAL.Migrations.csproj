@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TexasHoldemServer.DAL\TexasHoldem.Server.DAL.csproj" />
+    <ProjectReference Include="..\TexasHoldem.Server.DAL\TexasHoldem.Server.DAL.csproj" />
   </ItemGroup>
 
 </Project>
