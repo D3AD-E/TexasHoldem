@@ -20,13 +20,13 @@ namespace TexasHoldem.Client.Core.Game
 
         public Place PlayerToAct { get; private set; }
 
-        public List<Player> Players { get; set; }
+        public Dictionary<int, Player> Players { get; set; }
 
         private int orbitEnd;
 
         public PlayerController()
         {
-            Players = new List<Player>();
+            Players = new Dictionary<int, Player>();
         }
 
         public bool IsCurrentPlayerTurn(int currPlayerPlace)
@@ -56,6 +56,12 @@ namespace TexasHoldem.Client.Core.Game
             if (action == PlayerAction.Fold)
             {
                 PlayerToHandle.IsPlaying = false;
+                return HasOrbitEnded();
+            }
+            if (action == PlayerAction.FoldByDisconnect)
+            {
+                PlayerToHandle.IsPlaying = false;
+                PlayerToHandle.IsDisconnected = true;
                 return HasOrbitEnded();
             }
 
@@ -98,7 +104,7 @@ namespace TexasHoldem.Client.Core.Game
                 orbitEnd = Button.Value;
                 GameState++;
 
-                foreach(var player in Players)
+                foreach(var player in Players.Values)
                 {
                     if (!player.IsPlaying)
                         continue;
@@ -122,7 +128,10 @@ namespace TexasHoldem.Client.Core.Game
 
         public void HandleGameEnding()
         {
-            
+            Button = Button.GetNext();
+            SBlind = Button.GetNext();
+            BBlind = SBlind.GetNext();
+            PlayerToAct = BBlind.GetNext();
         }
 
         public void Setup(int bBPlace, int buttonPlace, int playerToAct, double BBBet)
@@ -145,7 +154,7 @@ namespace TexasHoldem.Client.Core.Game
         public int GetPlayingPlayersAmount()
         {
             int amount = 0;
-            foreach (var player in Players)
+            foreach (var player in Players.Values)
             {
                 if (player.IsPlaying)
                     amount++;
@@ -160,7 +169,7 @@ namespace TexasHoldem.Client.Core.Game
 
         public int GetWinnerPlace()
         {
-            foreach (var player in Players)
+            foreach (var player in Players.Values)
             {
                 if (player.IsPlaying)
                     return player.Place;

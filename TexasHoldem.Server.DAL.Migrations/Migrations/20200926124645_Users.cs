@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace TexasHoldemServer.DAL.Migrations.Migrations
+namespace TexasHoldem.Server.DAL.Migrations.Migrations
 {
     public partial class Users : Migration
     {

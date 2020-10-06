@@ -2,9 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using TexasHoldemServer.DAL.Models;
+using TexasHoldem.Server.DAL.Models;
 
-namespace TexasHoldemServer.DAL
+namespace TexasHoldem.Server.DAL
 {
     public class UserContext : DbContext
     {

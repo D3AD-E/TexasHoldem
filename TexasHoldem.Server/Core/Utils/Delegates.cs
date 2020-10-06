@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using TexasHoldemServer.Core.Network;
+using TexasHoldem.Server.Core.Network;
 
-namespace TexasHoldemServer
+namespace TexasHoldem.Server
 {
     public class Delegates
     {

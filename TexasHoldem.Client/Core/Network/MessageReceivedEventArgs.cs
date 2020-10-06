@@ -5,11 +5,11 @@ using TexasHoldemCommonAssembly.Network.Message;
 
 namespace TexasHoldem.Client.Core.Network
 {
-    public class MesssageReceivedEventArgs
+    public class MessageReceivedEventArgs
     {
         public ServerMessageBase Message { get; private set; }
 
-        public MesssageReceivedEventArgs(ServerMessageBase msg)
+        public MessageReceivedEventArgs(ServerMessageBase msg)
         {
             Message = msg;
         }

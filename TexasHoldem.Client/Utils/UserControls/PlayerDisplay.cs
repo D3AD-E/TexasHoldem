@@ -13,10 +13,10 @@ namespace TexasHoldem.Client
         public PlayerDisplay()
         {
             InitializeComponent();
-            //EmptySeatSetup();
+            EmptySeatSetup();
         }
 
-        private void EmptySeatSetup()
+        public void EmptySeatSetup()
         {
             UsernameLabel.Text = "Empty seat";
             MoneyLabel.Text = string.Empty;
@@ -27,6 +27,32 @@ namespace TexasHoldem.Client
         {
             MoneyLabel.Text = string.Empty;
             ActionLabel.Text = string.Empty;
+        }
+        public void SetupAfkBar(int maxValue)
+        {
+            AfkProgressBar.Maximum = maxValue;
+            AfkProgressBar.Value = 0;
+        }
+        public bool IncreasePlayerAfk(int by)
+        {
+            AfkProgressBar.Value += by;
+            if (AfkProgressBar.Value == AfkProgressBar.Maximum)
+            {
+                return true;
+            }
+            else
+                return false;
+        }
+        public void RefreshPlayerAfk()
+        {
+            AfkProgressBar.Value = 0;
+            AfkProgressBar.Hide();
+            ActionLabel.Show();
+        }
+        public void SetupPlayerAfkAwaiting()
+        {
+            AfkProgressBar.Show();
+            ActionLabel.Hide();
         }
     }
 }

@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 using TexasHoldem.Client.Core.Network;
 using TexasHoldem.Client.Utils;
@@ -49,7 +50,18 @@ namespace TexasHoldem.Client.Forms
                 }
                 else
                 {
-                    Application.Run(new GameForm(_username, _money, res));
+                    //Application.Run(new GameForm(_username, _money, res));
+                    Thread mThread = new Thread(delegate ()
+                    {
+                        var gf = new GameForm(_username, _money, res);
+                        gf.ShowDialog();
+                    });
+
+                    mThread.SetApartmentState(ApartmentState.STA);
+
+                    mThread.Start();
+                    //var gf = new GameForm(_username, _money, res);
+                    //gf.Show();
                 }
             });
         }
@@ -154,7 +166,17 @@ namespace TexasHoldem.Client.Forms
                     }
                     else
                     {
-                        Application.Run(new GameForm(_username, _money, res));
+                        //Thread mThread = new Thread(delegate ()
+                        //{
+                        //    var gf = new GameForm(_username, _money, res);
+                        //    gf.ShowDialog();
+                        //});
+
+                        //mThread.SetApartmentState(ApartmentState.STA);
+
+                        //mThread.Start();
+                        var gf = new GameForm(_username, _money, res);
+                        gf.Show();
                     }
                 });
             }

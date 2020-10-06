@@ -11,6 +11,7 @@ namespace TexasHoldemCommonAssembly.Enums
         Fold,
         Check,
         Call,
-        Raise
+        Raise,
+        FoldByDisconnect
     }
 }

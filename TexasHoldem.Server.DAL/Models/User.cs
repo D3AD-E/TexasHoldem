@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace TexasHoldemServer.DAL.Models
+namespace TexasHoldem.Server.DAL.Models
 {
     public class User : Entity
     {

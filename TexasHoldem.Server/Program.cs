@@ -2,9 +2,9 @@
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Threading;
-using TexasHoldemServer.Core.Network;
+using TexasHoldem.Server.Core.Network;
 
-namespace TexasHoldemServer
+namespace TexasHoldem.Server
 {
     class Program
     {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using TexasHoldem.Client.Core.Game;
 using TexasHoldem.Client.Core.Network;
@@ -17,6 +18,8 @@ namespace TexasHoldem.Client
     public partial class GameForm : Form
     {
         private readonly Core.Network.Client _client;
+
+        private Timer AfkTimer;
 
         private List<Card> Board;
 
@@ -38,9 +41,14 @@ namespace TexasHoldem.Client
 
         private const string PATH = @"../../Pics/cards.png";
 
+        private const int TIMER_INTERVAL = 200;//in ms
+
+        private const int PLAYER_AFK_DELAY = 15;//in sec
+
         public GameForm(string username, double money, JoinResponse res)
         {
             _client = Core.Network.Client.Instance;
+            _client.MessageReceived += Client_MessageReceived;
             PlayerController = new PlayerController();
             Board = new List<Card>();
 
@@ -54,16 +62,14 @@ namespace TexasHoldem.Client
 
             foreach (var player in res.PlayersInRoom)
             {
-                PlayerController.Players.Add(new Player(player));
+                PlayerController.Players.Add(player.Place, new Player(player));
             }
-            PlayerController.Players.Insert(CurrentPlayer.Place, CurrentPlayer);
-
+            
+            PlayerController.Players.Add(CurrentPlayer.Place, CurrentPlayer);
             InitializeComponent();
-
-            _client.MessageReceived += Client_MessageReceived;
         }
 
-        private void Client_MessageReceived(MesssageReceivedEventArgs args)
+        private void Client_MessageReceived(MessageReceivedEventArgs args)
         {
             var msg = args.Message;
             if (msg is GameEndServer)
@@ -90,9 +96,10 @@ namespace TexasHoldem.Client
 
         private void GameEndHandler(GameEndServer msg)
         {
-            if(ActivePlayers <= 1)
+            AfkTimer.Stop();
+            if (ActivePlayers < 1)
             {
-                throw new ArgumentOutOfRangeException("Desync with server happenned");
+                ExeptionHandler.HandleExeption(new Exception("Desync with server happenned"), true);
             }
             if (msg.Showdown)
             {
@@ -111,7 +118,7 @@ namespace TexasHoldem.Client
 
         private void GameEndingHandler()
         {
-            foreach (var player in PlayerController.Players)
+            foreach (var player in PlayerController.Players.Values)
             {
                 if (!player.IsPlaying || player.Holding != null)
                     continue;
@@ -122,14 +129,65 @@ namespace TexasHoldem.Client
 
             //for (int i = 0; i<PlayerDisplays.Length; i++)
             //    RefreshPlayerDisplay(i);
+
+            RefreshGame().ConfigureAwait(false);
             RefreshPotDisplay();
-            ActionButtonsBehaviour(true);
+            ActionButtonsBehaviour(false);
+        }
+
+        private async Task RefreshGame()
+        {
+            foreach (var player in PlayerController.Players.Values)
+            {
+                if (player.IsDisconnected)
+                {
+                    PlayerDisplays[player.Place].EmptySeatSetup();
+                    PlayerController.Players.Remove(player.Place);
+                    continue;
+                }  
+            }
+            await Task.Delay(2800);
+            Board.Clear();
+            
+            foreach(var display in PlayerDisplays)
+            {
+                if (display.CardImg0.Image != null)
+                {
+                    InvokeUI(() =>
+                    {
+                        display.CardImg0.Image.Dispose();
+                        display.CardImg0.Image = null;
+                    });
+                    
+                }
+                if (display.CardImg1.Image != null)
+                {
+                    InvokeUI(() =>
+                    {
+                        display.CardImg1.Image.Dispose();
+                        display.CardImg1.Image = null;
+                    });
+                    
+                }
+            }
+
+            foreach (var pictureBox in BoardImg)
+            {
+                if (pictureBox.Image != null)
+                {
+                    InvokeUI(() =>
+                    {
+                        pictureBox.Image.Dispose();
+                        pictureBox.Image = null;
+                    });
+                }
+            }
         }
 
         private void DetermineWinner()
         {
             List<Player> suitablePlayers = new List<Player>();
-            foreach (var player in PlayerController.Players)
+            foreach (var player in PlayerController.Players.Values)
             {
                 if (!player.IsPlaying)
                     continue;
@@ -203,7 +261,7 @@ namespace TexasHoldem.Client
 
         private void NewPlayerJoinedHandler(NewPlayerJoinedServer msg)
         {
-            PlayerController.Players.Add(new Player(msg.Player));
+            PlayerController.Players.Add(msg.Player.Place, new Player(msg.Player));
             InvokeUI(() =>
             {
                 PlayerDisplays[msg.Player.Place].UsernameLabel.Text = msg.Player.Username;
@@ -213,38 +271,41 @@ namespace TexasHoldem.Client
 
         private void PlayerActionHandler(PlayerActionServer msg)
         {
-            string action = msg.Action.ToString();
-            if (msg.RaiseAmount != 0)
-            {
-                action += " for " + msg.RaiseAmount;
-            }
+            HandlePlayerAction(msg.PlayerPos, msg.Action, msg.RaiseAmount);
+            //string action = msg.Action.ToString();
+            //if (msg.RaiseAmount != 0)
+            //{
+            //    action += " for " + msg.RaiseAmount;
+            //}
 
-            CurrentBet += msg.RaiseAmount;
+            //CurrentBet += msg.RaiseAmount;
 
-            if (PlayerController.HandleAction(msg.Action, CurrentBet))
-                GameStateChanged();
+            //if (PlayerController.HandleAction(msg.Action, CurrentBet))
+            //    GameStateChanged();
 
-            PotSize += PlayerController.GetMoneyToPot(msg.PlayerPos);
+            //PotSize += PlayerController.GetMoneyToPot(msg.PlayerPos);
 
-            if(PlayerController.HasGameEnded())
-            {
-                int winnerPlace = PlayerController.GetWinnerPlace();
-                if (winnerPlace == -1)
-                    throw new Exception("No active players");
-                RefreshPlayerDisplay(winnerPlace, "Won "+PotSize);
-                PotSize = 0;
-                PlayerController.HandleGameEnding();
-                RefreshPotDisplay();
-                return;
-            }
+            //if(PlayerController.HasGameEnded())
+            //{
+            //    int winnerPlace = PlayerController.GetWinnerPlace();
+            //    if (winnerPlace == -1)
+            //        throw new Exception("No active players");
+            //    RefreshPlayerDisplay(winnerPlace, "Won "+PotSize);
+            //    PotSize = 0;
+            //    PlayerController.HandleGameEnding();
+            //    RefreshGame().ConfigureAwait(false);
+            //    RefreshPotDisplay();
+            //    ActionButtonsBehaviour(false);
+            //    return;
+            //}
 
 
-            if (PlayerController.GameState == GameState.Showdown)
-                ActivePlayers = PlayerController.GetPlayingPlayersAmount();
+            //if (PlayerController.GameState == GameState.Showdown)
+            //    ActivePlayers = PlayerController.GetPlayingPlayersAmount();
 
-            RefreshPlayerDisplay(msg.PlayerPos, action);
-            RefreshPotDisplay();
-            ActionButtonsBehaviour(PlayerController.IsCurrentPlayerTurn(CurrentPlayer.Place));
+            //RefreshPlayerDisplay(msg.PlayerPos, action);
+            //RefreshPotDisplay();
+            //ActionButtonsBehaviour(PlayerController.IsCurrentPlayerTurn(CurrentPlayer.Place));
         }
 
         private void CardInfoHandler(CardInfoServer msg)
@@ -300,14 +361,6 @@ namespace TexasHoldem.Client
             }
         }
 
-        private void button3_Click(object sender, EventArgs e)
-        {
-            //ForceStart
-            var force = new ForceStart();
-            _client.SendMessage(force);
-            ActionButtonsBehaviour(true);
-        }
-
         private void HandleCurrentPlayerAction(PlayerAction action, double raiseAmount = 0)
         {
             if(PlayerController.Players[CurrentPlayer.Place].Money == 0)
@@ -318,33 +371,38 @@ namespace TexasHoldem.Client
 
             _client.SendPlayerAction(action, raiseAmount);
 
-            string actionStr = action.ToString();
-            if (raiseAmount != 0)
-            {
-                actionStr += " for " + raiseAmount;
-            }
+            HandlePlayerAction(CurrentPlayer.Place, action, raiseAmount);
 
-            CurrentBet += raiseAmount;
-            if (PlayerController.HandleAction(action, CurrentBet))
-                GameStateChanged();
+            //string actionStr = action.ToString();
+            //if (raiseAmount != 0)
+            //{
+            //    actionStr += " for " + raiseAmount;
+            //}
 
-            PotSize += PlayerController.GetMoneyToPot(CurrentPlayer.Place);
+            //CurrentBet += raiseAmount;
+            //if (PlayerController.HandleAction(action, CurrentBet))
+            //    GameStateChanged();
 
-            if (PlayerController.HasGameEnded())
-            {
-                RefreshPlayerDisplay(CurrentPlayer.Place, "Won " + PotSize);
-                PotSize = 0;
-                PlayerController.HandleGameEnding();
-                RefreshPotDisplay();
-                return;
-            }
+            //PotSize += PlayerController.GetMoneyToPot(CurrentPlayer.Place);
 
-            if (PlayerController.GameState == GameState.Showdown)
-                ActivePlayers = PlayerController.GetPlayingPlayersAmount();
+            //if (PlayerController.HasGameEnded())
+            //{
+            //    int winnerPlace = PlayerController.GetWinnerPlace();
+            //    RefreshPlayerDisplay(winnerPlace, "Won " + PotSize);
+            //    PotSize = 0;
+            //    PlayerController.HandleGameEnding();
+            //    RefreshPotDisplay();
+            //    RefreshGame().ConfigureAwait(false);
+            //    ActionButtonsBehaviour(false);
+            //    return;
+            //}
 
-            RefreshPlayerDisplay(CurrentPlayer.Place, actionStr);
-            RefreshPotDisplay();
-            ActionButtonsBehaviour(PlayerController.IsCurrentPlayerTurn(CurrentPlayer.Place));
+            //if (PlayerController.GameState == GameState.Showdown)
+            //    ActivePlayers = PlayerController.GetPlayingPlayersAmount();
+
+            //RefreshPlayerDisplay(CurrentPlayer.Place, actionStr);
+            //RefreshPotDisplay();
+            //ActionButtonsBehaviour(PlayerController.IsCurrentPlayerTurn(CurrentPlayer.Place));
         }
 
         private void RefreshPotDisplay()
@@ -407,6 +465,7 @@ namespace TexasHoldem.Client
 
         private void GameForm_Load(object sender, EventArgs e)
         {
+
             BoardImg = new PictureBox[5];
             BoardImg[0] = BoardCard1Img;
             BoardImg[1] = BoardCard2Img;
@@ -416,20 +475,36 @@ namespace TexasHoldem.Client
 
             PlayerDisplays = new PlayerDisplay[8];
 
-            int i = 0;
-            foreach (Control c in this.Controls)
+            //int i = 0;
+            //foreach (Control c in this.Controls)
+            //{
+            //    if (c is PlayerDisplay)
+            //    {
+            //        PlayerDisplays[i] = c as PlayerDisplay;
+            //        i++;
+            //    }
+            //}
+
+            PlayerDisplays[0] = playerDisplay1;
+            PlayerDisplays[1] = playerDisplay2;
+            PlayerDisplays[2] = playerDisplay3;
+            PlayerDisplays[3] = playerDisplay4;
+            PlayerDisplays[4] = playerDisplay5;
+            PlayerDisplays[5] = playerDisplay6;
+            PlayerDisplays[6] = playerDisplay7;
+            PlayerDisplays[7] = playerDisplay8;
+
+            int maxValue = 1000 / TIMER_INTERVAL * PLAYER_AFK_DELAY;
+
+            foreach(var display in PlayerDisplays)
             {
-                if (c is PlayerDisplay)
-                {
-                    PlayerDisplays[i] = c as PlayerDisplay;
-                    i++;
-                }
+                display.SetupAfkBar(maxValue);
             }
 
             UsernameLabel.Text = CurrentPlayer.Username;
 
             PotSizeLabel.Text = PotSize.ToString();
-            foreach (var player in PlayerController.Players)
+            foreach (var player in PlayerController.Players.Values)
             {
                 PlayerDisplays[player.Place].UsernameLabel.Text = player.Username;
                 PlayerDisplays[player.Place].MoneyLabel.Text = player.Money.ToString();
@@ -456,6 +531,85 @@ namespace TexasHoldem.Client
         private void FoldFButon_Click(object sender, EventArgs e)
         {
             HandleCurrentPlayerAction(PlayerAction.Fold);
+        }
+
+        private void HandlePlayerAction(int place, PlayerAction action, double raiseAmount = 0)
+        {
+            string actionStr = action.ToString();
+            if (raiseAmount != 0)
+            {
+                actionStr += " for " + raiseAmount;
+            }
+
+            CurrentBet += raiseAmount;
+
+            if (PlayerController.HandleAction(action, CurrentBet))
+                GameStateChanged();
+
+            PotSize += PlayerController.GetMoneyToPot(place);
+
+            if (PlayerController.HasGameEnded())
+            {
+                int winnerPlace = PlayerController.GetWinnerPlace();
+                if (winnerPlace == -1)
+                    throw new Exception("No active players");
+                RefreshPlayerDisplay(winnerPlace, "Won " + PotSize);
+                PotSize = 0;
+
+                PlayerController.HandleGameEnding();
+                RefreshGame().ConfigureAwait(false);
+                RefreshPotDisplay();
+                ActionButtonsBehaviour(false);
+            }
+            else
+            {
+                if (PlayerController.GameState == GameState.Showdown)
+                    ActivePlayers = PlayerController.GetPlayingPlayersAmount();
+                else
+                {
+                    PlayerDisplays[PlayerController.PlayerToAct.Value].SetupPlayerAfkAwaiting();
+                    if (AfkTimer == null)
+                    {
+                        AfkTimer = new Timer();
+                        AfkTimer.Enabled = true;
+                        AfkTimer.Start();
+                        AfkTimer.Interval = TIMER_INTERVAL;
+                        AfkTimer.Tick += new EventHandler(AfkTimer_Tick);
+                    }
+                    else
+                    {
+                        AfkTimer.Start();
+                    }
+                }
+
+                RefreshPlayerDisplay(place, actionStr);
+                RefreshPotDisplay();
+                ActionButtonsBehaviour(PlayerController.IsCurrentPlayerTurn(CurrentPlayer.Place));
+            }
+        }
+
+        private void AfkTimer_Tick(object sender, EventArgs e)
+        {
+            int playerToActPlace = PlayerController.PlayerToAct.Value;
+            if (PlayerDisplays[playerToActPlace].IncreasePlayerAfk(1))
+            {
+                AfkTimer.Stop();
+                PlayerDisplays[playerToActPlace].RefreshPlayerAfk();
+                //if(playerToActPlace == CurrentPlayer.Place)
+                //{
+                //    if(CurrentBet == 0)
+                //        HandleCurrentPlayerAction(PlayerAction.Check);
+                //    else
+                //        HandleCurrentPlayerAction(PlayerAction.Fold);
+                //}
+                //else
+                {
+                    if (CurrentBet == 0)
+                        HandlePlayerAction(playerToActPlace, PlayerAction.Check);
+                    else
+                        HandlePlayerAction(playerToActPlace, PlayerAction.Fold);
+                }
+            }
         }
     }
 }

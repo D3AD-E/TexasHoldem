@@ -3,10 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using TexasHoldemCommonAssembly.Enums;
 using TexasHoldemCommonAssembly.Game.Entities;
-using TexasHoldemServer.Core.Game;
-using TexasHoldemServer.Core.Game.Entities;
+using TexasHoldem.Server.Core.Game;
+using TexasHoldem.Server.Core.Game.Entities;
+using TexasHoldem.Server.DAL.Models;
+using TexasHoldem.Server.Enums;
+using System.Threading;
+using System.Timers;
+using TexasHoldem.Server.Core.Network;
 
-namespace TexasHoldemServer
+namespace TexasHoldem.Server
 {
     public class GameLogic
     {
@@ -28,14 +33,20 @@ namespace TexasHoldemServer
 
         public string Name { get; private set; }
 
+        public bool IsGameInProcess { get; private set; }
+
+        private System.Timers.Timer AfkTimer;
+
         private const int DECK_SIZE = 52;
+
+        private const int PLAYER_AFK_DELAY = 15;//in sec
 
         public GameLogic(string name, int maxPlayerAmount)
         {
             Name = name;
             MaxPlayerAmount = maxPlayerAmount;
             CurrentPlayerAmount = 0;
-
+            IsGameInProcess = false;
 
             SetupDeck();
             PlayerController = new PlayerActionController();
@@ -114,12 +125,12 @@ namespace TexasHoldemServer
         }
         public List<PlayerData> GetAllPlayers()
         {
-            return PlayerController.Players;
+            return PlayerController.Players.Values.ToList();
         }
         public List<PlayerData> GetActivePlayers()
         {
             List<PlayerData> suitablePlayers = new List<PlayerData>();
-            foreach (var player in PlayerController.Players)
+            foreach (var player in PlayerController.Players.Values)
             {
                 if (!player.IsPlaying)
                     continue;
@@ -130,8 +141,10 @@ namespace TexasHoldemServer
 
         private void HandleGameEnd()
         {
+            IsGameInProcess = false;
+
             List<PlayerData> suitablePlayers = new List<PlayerData>();
-            foreach (var player in PlayerController.Players)
+            foreach (var player in PlayerController.Players.Values)
             {
                 if (!player.IsPlaying)
                     continue;
@@ -171,16 +184,19 @@ namespace TexasHoldemServer
             PotSize = 0;
         }
 
-        public bool HasGameEnded()
+        public GameEndType HasGameEnded()
         {
-            if (PlayerController.HasGameEnded())
+            var endType = PlayerController.HasGameEnded();
+            if (endType == Enums.GameEndType.None)
+            {
+                return endType;
+            }
+            else
             {
                 PlayerController.HandleGameEnd();
                 HandleGameEnd();
-                return true;
+                return endType;
             }
-            else
-                return false;
         }
 
         public bool HandlePlayerAction(Guid id, PlayerAction action, double bet = 0)
@@ -197,7 +213,7 @@ namespace TexasHoldemServer
 
         public List<Card> GetPendingCardsIfAny()
         {
-            if (PlayerController.HasOrbitEnded() || PlayerController.GameState ==GameState.Showdown)
+            if (PlayerController.HasOrbitEnded() || PlayerController.GameState == GameState.Showdown)
             {
                 CurrentBet = 0;
                 return DealCardsToBoard(PlayerController.GameState);
@@ -208,7 +224,11 @@ namespace TexasHoldemServer
 
         public void Start()
         {
+            IsGameInProcess = true;
+            RefreshGame();
+
             PlayerController.SetupGame(BBlindBet);
+
             CurrentBet = BBlindBet;
             PotSize = BBlindBet + BBlindBet / 2;
         }
@@ -221,22 +241,57 @@ namespace TexasHoldemServer
             }
         }
 
-        public int AddPlayer(Guid id, string username)
+        public int AddPlayer(Guid id, string username, double money, Receiver receiver)
         {
-            int place = PlayerController.Players.Count();
-            PlayerController.Players.Add(new PlayerData(id, place, username));
-            CurrentPlayerAmount++;
-            return place;
+            for(int i =0; i<8;i++)
+            {
+                if(!PlayerController.Players.ContainsKey(i))
+                {
+                    PlayerController.Players.Add(i, new PlayerData(id, i, username, money, receiver));
+                    CurrentPlayerAmount++;
+                    return i;
+                }
+            }
+
+            
+            return -1;
         }
 
         public List<PlayerBase> GetPlayers() //??????????????????? does not work otherwise, cast from linq
         {
             List<PlayerBase> toret = new List<PlayerBase>();
-            foreach(var player in PlayerController.Players)
+            foreach(var player in PlayerController.Players.Values)
             {
                 toret.Add(new PlayerBase() { Money = player.Money, Place = player.Place, Username = player.Username });
             }
             return toret;
+        }
+
+        public void CurrentPlayerAfkTimerStart()
+        {
+            if (AfkTimer == null)
+            {
+                AfkTimer = new System.Timers.Timer();
+                AfkTimer.Enabled = true;
+                AfkTimer.Start();
+                AfkTimer.Interval = PLAYER_AFK_DELAY;
+                AfkTimer.Elapsed += new ElapsedEventHandler(AfkTimer_Tick);
+            }
+            else
+            {
+                AfkTimer.Start();
+            }
+        }
+
+        public void PlayerDisconnected(int place)
+        {
+            PlayerController.Players.Remove(place);
+        }
+
+        private void AfkTimer_Tick(object sender, ElapsedEventArgs e)
+        {
+            AfkTimer.Stop();
+            PlayerController.Players[PlayerController.PlayerToAct.Value].ClientReceiver.CurrentPlayerFoldByTime();
         }
 
         public int GetCurrentPlayerPlace()
@@ -253,70 +308,5 @@ namespace TexasHoldemServer
         {
             return PlayerController.Button.Value;
         }
-
-        //private void Test()
-        //{
-        //    foreach (var player in Players)
-        //    {
-        //        foreach (var card in player.Hand)
-        //        {
-        //            //Console.WriteLine("Player number " + player.ID + " has " + card.ToString());
-        //        }
-        //    }
-
-        //    var rand = new Random();
-        //    int cardNum;
-
-        //    for (int j = 0; j < 5; j++)
-        //    {
-        //        do
-        //        {
-        //            cardNum = rand.Next(52);
-        //        } while (Deck[cardNum].isDrawn);
-        //        Board[j] = Deck[cardNum];
-        //        Deck[cardNum].isDrawn = true;
-        //    }
-
-        //    //Board[0] = new Card(CardProperty.Suit.Diamonds, CardProperty.Value.Nine);
-        //    //Board[1] = new Card(CardProperty.Suit.Clubs, CardProperty.Value.Nine);
-        //    //Board[2] = new Card(CardProperty.Suit.Spades, CardProperty.Value.Seven);
-        //    //Board[3] = new Card(CardProperty.Suit.Diamonds, CardProperty.Value.Seven);
-        //    //Board[4] = new Card(CardProperty.Suit.Spades, CardProperty.Value.Nine);
-
-        //    Console.WriteLine("Board is:");
-        //    foreach (var card in Board)
-        //    {
-        //        Console.Write(card.ToString() + " ||| ");
-        //    }
-        //    Console.Write(Environment.NewLine);
-        //    DetermineWinner();
-        //}
-
-        //private void DetermineWinner()
-        //{
-        //    foreach(var player in Players.Values)
-        //    {
-        //        DetermineHolding(player);
-        //    }
-
-        //    Player winner = Players[0];
-        //    //Bug when more than 2 players and tie
-        //    for (int i = 1; i < Players.Count(); i++)
-        //    {
-        //        int res = winner.Holding.CompareTo(Players[i].Holding);
-        //        if (res == 0)
-        //        {
-        //            Console.WriteLine("Tie with " + winner.Holding.Rank);
-        //            return;
-        //        }
-        //        else if (res <= -1)
-        //            winner = Players[i];
-        //    }
-        //    //Console.WriteLine("Player " + winner.ID + " won with " + winner.Holding.Rank);
-        //    //foreach (var player in Players)
-        //    //{
-        //    //    Console.WriteLine("Player " + player.ID + " had " + player.Holding.Rank);
-        //    //}
-        //}
     }
 }

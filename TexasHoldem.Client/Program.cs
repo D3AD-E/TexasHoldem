@@ -28,6 +28,7 @@ namespace TexasHoldem.Client
             {
                 var roomForm = new RoomsBrowserForm(startUpForm.Username, startUpForm.Money);
                 Application.Run(roomForm);
+
             }
             if(Core.Network.Client.Instance.Status == TexasHoldemCommonAssembly.Enums.Status.Connected)
             {

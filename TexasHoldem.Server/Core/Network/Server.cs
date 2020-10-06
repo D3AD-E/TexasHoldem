@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using TexasHoldemCommonAssembly.Game.Entities;
 using TexasHoldemCommonAssembly.Network.Message;
-using TexasHoldemServer.Core.Game.Entities;
-using TexasHoldemServer.Core.Services;
+using TexasHoldem.Server.Core.Game.Entities;
+using TexasHoldem.Server.Core.Services;
 
-namespace TexasHoldemServer.Core.Network
+namespace TexasHoldem.Server.Core.Network
 {
     public class Server
     {
@@ -104,11 +104,12 @@ namespace TexasHoldemServer.Core.Network
             Console.WriteLine("Client connected");
         }
 
-        public void SendMessageToAll(ServerMessageBase msg)
+        public void SendMessageToAll(ServerMessageBase msg, GameLogic inGame)
         {
             foreach(var receiver in Receivers)
             {
-                receiver.SendMessage(msg);
+                if(receiver.Game == inGame)
+                    receiver.SendMessage(msg);
             }
         }
 
@@ -121,12 +122,20 @@ namespace TexasHoldemServer.Core.Network
                 receiver.SendMessage(msg);
             }
         }
-
-        public void SendMessageToAllExcept(ServerMessageBase msg, Guid notToSendTo)
+        public void SendMessageToAllExcept(ServerMessageBase msg, Receiver notToSendTo, GameLogic inGame)
         {
             foreach (var receiver in Receivers)
             {
-                if (receiver.ID == notToSendTo)
+                if (receiver == notToSendTo || receiver.Game != inGame)
+                    continue;
+                receiver.SendMessage(msg);
+            }
+        }
+        public void SendMessageToAllExcept(ServerMessageBase msg, Guid notToSendTo, GameLogic inGame)
+        {
+            foreach (var receiver in Receivers)
+            {
+                if (receiver.ID == notToSendTo || receiver.Game != inGame)
                     continue;
                 receiver.SendMessage(msg);
             }

@@ -44,7 +44,7 @@
             this.panel1.Controls.Add(this.BottomLabel);
             this.panel1.Controls.Add(this.TopLabel);
             this.panel1.Controls.Add(this.OKFButton);
-            this.panel1.Location = new System.Drawing.Point(5, 5);
+            this.panel1.Location = new System.Drawing.Point(4, 5);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(412, 209);
             this.panel1.TabIndex = 0;
@@ -65,17 +65,17 @@
             this.BottomLabel.AutoSize = true;
             this.BottomLabel.Location = new System.Drawing.Point(35, 76);
             this.BottomLabel.Name = "BottomLabel";
-            this.BottomLabel.Size = new System.Drawing.Size(48, 17);
+            this.BottomLabel.Size = new System.Drawing.Size(46, 18);
             this.BottomLabel.TabIndex = 2;
             this.BottomLabel.Text = "label1";
             // 
             // TopLabel
             // 
             this.TopLabel.AutoSize = true;
-            this.TopLabel.Font = new System.Drawing.Font("Gilroy Light", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.TopLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.TopLabel.Location = new System.Drawing.Point(172, 36);
             this.TopLabel.Name = "TopLabel";
-            this.TopLabel.Size = new System.Drawing.Size(74, 28);
+            this.TopLabel.Size = new System.Drawing.Size(79, 29);
             this.TopLabel.TabIndex = 1;
             this.TopLabel.Text = "label1";
             // 
@@ -95,14 +95,15 @@
             // 
             // FlatMessageBox
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 17F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
             this.ClientSize = new System.Drawing.Size(422, 219);
             this.ControlBox = false;
             this.Controls.Add(this.panel1);
-            this.Font = new System.Drawing.Font("Gilroy Light", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.MaximizeBox = false;
             this.MinimizeBox = false;

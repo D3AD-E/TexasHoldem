@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace TexasHoldemServer.DAL
+namespace TexasHoldem.Server.DAL
 {
     public abstract class Entity
     {

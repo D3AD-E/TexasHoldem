@@ -6,11 +6,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TexasHoldemServer.Core.Network;
-using TexasHoldemServer.Core.Services;
-using TexasHoldemServer.DAL;
+using TexasHoldem.Server.Core.Network;
+using TexasHoldem.Server.Core.Services;
+using TexasHoldem.Server.DAL;
 
-namespace TexasHoldemServer
+namespace TexasHoldem.Server
 {
     public class Startup
     { 
@@ -19,7 +19,7 @@ namespace TexasHoldemServer
             services.AddDbContext<UserContext>(options =>
             {
                 options.UseSqlServer(@"Server=localhost\SQLEXPRESS;Database=TexasHoldem;Trusted_Connection=True;MultipleActiveResultSets=true",
-                    x => x.MigrationsAssembly("TexasHoldemServer.DAL.Migrations"));
+                    x => x.MigrationsAssembly("TexasHoldem.Server.DAL.Migrations"));
                 options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             });
 
@@ -27,7 +27,7 @@ namespace TexasHoldemServer
 
             var serviceProvider = services.BuildServiceProvider();
 
-            var server = new Server(serviceProvider);
+            var server = new TexasHoldem.Server.Core.Network.Server(serviceProvider);
             server.Start();
 
             services.AddSingleton(server);

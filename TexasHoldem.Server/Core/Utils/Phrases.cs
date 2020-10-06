@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TexasHoldemServer.Utils
+namespace TexasHoldem.Server.Utils
 {
     public class Phrases
     {

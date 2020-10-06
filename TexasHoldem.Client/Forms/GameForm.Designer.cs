@@ -66,7 +66,7 @@
             this.UsernameLabel.Location = new System.Drawing.Point(35, 506);
             this.UsernameLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.UsernameLabel.Name = "UsernameLabel";
-            this.UsernameLabel.Size = new System.Drawing.Size(79, 17);
+            this.UsernameLabel.Size = new System.Drawing.Size(77, 18);
             this.UsernameLabel.TabIndex = 2;
             this.UsernameLabel.Text = "Username";
             // 
@@ -147,14 +147,14 @@
             this.PotSizeLabel.Location = new System.Drawing.Point(403, 338);
             this.PotSizeLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.PotSizeLabel.Name = "PotSizeLabel";
-            this.PotSizeLabel.Size = new System.Drawing.Size(38, 17);
+            this.PotSizeLabel.Size = new System.Drawing.Size(39, 18);
             this.PotSizeLabel.TabIndex = 11;
             this.PotSizeLabel.Text = "Pot: ";
             // 
             // playerDisplay1
             // 
             this.playerDisplay1.BackColor = System.Drawing.Color.Transparent;
-            this.playerDisplay1.Font = new System.Drawing.Font("Gilroy Light", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.playerDisplay1.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.playerDisplay1.Location = new System.Drawing.Point(451, 365);
             this.playerDisplay1.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.playerDisplay1.Name = "playerDisplay1";
@@ -167,14 +167,14 @@
             this.HoldingLabel.Location = new System.Drawing.Point(325, 506);
             this.HoldingLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.HoldingLabel.Name = "HoldingLabel";
-            this.HoldingLabel.Size = new System.Drawing.Size(61, 17);
+            this.HoldingLabel.Size = new System.Drawing.Size(58, 18);
             this.HoldingLabel.TabIndex = 13;
             this.HoldingLabel.Text = "Holding";
             // 
             // playerDisplay2
             // 
             this.playerDisplay2.BackColor = System.Drawing.Color.Transparent;
-            this.playerDisplay2.Font = new System.Drawing.Font("Gilroy Light", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.playerDisplay2.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.playerDisplay2.Location = new System.Drawing.Point(649, 254);
             this.playerDisplay2.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.playerDisplay2.Name = "playerDisplay2";
@@ -184,7 +184,7 @@
             // playerDisplay4
             // 
             this.playerDisplay4.BackColor = System.Drawing.Color.Transparent;
-            this.playerDisplay4.Font = new System.Drawing.Font("Gilroy Light", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.playerDisplay4.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.playerDisplay4.Location = new System.Drawing.Point(451, 27);
             this.playerDisplay4.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.playerDisplay4.Name = "playerDisplay4";
@@ -194,7 +194,7 @@
             // playerDisplay8
             // 
             this.playerDisplay8.BackColor = System.Drawing.Color.Transparent;
-            this.playerDisplay8.Font = new System.Drawing.Font("Gilroy Light", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.playerDisplay8.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.playerDisplay8.Location = new System.Drawing.Point(226, 365);
             this.playerDisplay8.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.playerDisplay8.Name = "playerDisplay8";
@@ -204,7 +204,7 @@
             // playerDisplay5
             // 
             this.playerDisplay5.BackColor = System.Drawing.Color.Transparent;
-            this.playerDisplay5.Font = new System.Drawing.Font("Gilroy Light", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.playerDisplay5.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.playerDisplay5.Location = new System.Drawing.Point(226, 27);
             this.playerDisplay5.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.playerDisplay5.Name = "playerDisplay5";
@@ -214,7 +214,7 @@
             // playerDisplay3
             // 
             this.playerDisplay3.BackColor = System.Drawing.Color.Transparent;
-            this.playerDisplay3.Font = new System.Drawing.Font("Gilroy Light", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.playerDisplay3.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.playerDisplay3.Location = new System.Drawing.Point(649, 95);
             this.playerDisplay3.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.playerDisplay3.Name = "playerDisplay3";
@@ -224,7 +224,7 @@
             // playerDisplay6
             // 
             this.playerDisplay6.BackColor = System.Drawing.Color.Transparent;
-            this.playerDisplay6.Font = new System.Drawing.Font("Gilroy Light", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.playerDisplay6.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.playerDisplay6.Location = new System.Drawing.Point(36, 95);
             this.playerDisplay6.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.playerDisplay6.Name = "playerDisplay6";
@@ -234,7 +234,7 @@
             // playerDisplay7
             // 
             this.playerDisplay7.BackColor = System.Drawing.Color.Transparent;
-            this.playerDisplay7.Font = new System.Drawing.Font("Gilroy Light", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.playerDisplay7.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.playerDisplay7.Location = new System.Drawing.Point(36, 254);
             this.playerDisplay7.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.playerDisplay7.Name = "playerDisplay7";
@@ -317,20 +317,20 @@
             this.topBorder1.BackColor = System.Drawing.Color.Transparent;
             this.topBorder1.HasMinimize = true;
             this.topBorder1.Location = new System.Drawing.Point(0, 0);
-            this.topBorder1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.topBorder1.Margin = new System.Windows.Forms.Padding(2);
             this.topBorder1.Name = "topBorder1";
             this.topBorder1.Size = new System.Drawing.Size(904, 31);
             this.topBorder1.TabIndex = 15;
             // 
             // GameForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 17F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
             this.ClientSize = new System.Drawing.Size(904, 670);
             this.Controls.Add(this.topBorder1);
             this.Controls.Add(this.panel1);
-            this.Font = new System.Drawing.Font("Gilroy Light", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.MaximizeBox = false;

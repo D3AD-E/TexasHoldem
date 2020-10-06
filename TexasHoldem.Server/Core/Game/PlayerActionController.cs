@@ -5,9 +5,10 @@ using System.Text;
 using System.Transactions;
 using TexasHoldemCommonAssembly.Enums;
 using TexasHoldemCommonAssembly.Game.Entities;
-using TexasHoldemServer.Core.Game.Entities;
+using TexasHoldem.Server.Core.Game.Entities;
+using TexasHoldem.Server.Enums;
 
-namespace TexasHoldemServer.Core.Game
+namespace TexasHoldem.Server.Core.Game
 {
     public class PlayerActionController
     {
@@ -23,18 +24,43 @@ namespace TexasHoldemServer.Core.Game
 
         public Place PlayerToAct { get; private set; }
 
-        public List<PlayerData> Players { get; set; }
+        public Dictionary<int, PlayerData> Players { get; set; }
 
         private int orbitEnd;
 
         public PlayerActionController()
         {
-            Players = new List<PlayerData>();
+            Players = new Dictionary<int, PlayerData>();
         }
 
         public void SetupGame(double BBBet)
         {
+            foreach(var player in Players.Values)
+            {
+                player.IsPlaying = true;
+            }
+
             GameState = GameState.PreFlop;
+
+            if(Button == null)
+            {
+                SetupNewGame();
+            }
+            else
+            {
+                RefreshGame();
+            }
+
+
+            Players[BBlind.Value].Money -= BBBet;
+            Players[BBlind.Value].CurrentBet = BBBet;
+
+            Players[SBlind.Value].Money -= BBBet / 2;
+            Players[SBlind.Value].CurrentBet = BBBet / 2;
+        }
+
+        private void SetupNewGame()
+        {
             if (Players.Count == 2)
             {
                 Button = new Place(0, 2);
@@ -50,16 +76,6 @@ namespace TexasHoldemServer.Core.Game
                 PlayerToAct = BBlind.GetNext();
             }
             orbitEnd = PlayerToAct.GetPrevious().Value;
-
-            foreach (var player in Players)
-            {
-                player.IsPlaying = true;
-            }
-            Players[BBlind.Value].Money -= BBBet;
-            Players[BBlind.Value].CurrentBet = BBBet;
-
-            Players[SBlind.Value].Money -= BBBet / 2;
-            Players[SBlind.Value].CurrentBet = BBBet / 2;
         }
 
         public bool HandleAction(Guid id, PlayerAction action, double bet) //bug with all in
@@ -89,7 +105,7 @@ namespace TexasHoldemServer.Core.Game
                 return true;
             }
 
-            if (action == PlayerAction.Call)
+            if (action == PlayerAction.Call || action == PlayerAction.Check)
             {
                 PlayerToHandle.Money -= moneyToSubstract;
             }
@@ -98,11 +114,12 @@ namespace TexasHoldemServer.Core.Game
                 PlayerToHandle.Money -= moneyToSubstract;
                 orbitEnd = PlayerToAct.GetPrevious().Value;
             }
-            else if (action == PlayerAction.Check)
+            else if (action == PlayerAction.FoldByDisconnect)
             {
-                //Players[PlayerToAct.Value].PreviousBet = 0;
+                PlayerToHandle.IsPlaying = false;
+                PlayerToHandle.IsDisconnected = true;
+                return true;
             }
-
 
             return true;
         }
@@ -129,7 +146,7 @@ namespace TexasHoldemServer.Core.Game
                 orbitEnd = Button.Value;
                 GameState++;
 
-                foreach (var player in Players)
+                foreach (var player in Players.Values)
                 {
                     if (!player.IsPlaying)
                         continue;
@@ -151,26 +168,26 @@ namespace TexasHoldemServer.Core.Game
             return Players[playerPos].CurrentBet - Players[playerPos].PreviousBet;
         }
 
-        public bool HasGameEnded()
+        public GameEndType HasGameEnded()
         {
             if (GameState == GameState.Showdown)
             {
-                return true;
+                return GameEndType.Showdown;
             }
             else
             {
                 int nonFolders = 0;
-                foreach (var player in Players)
+                foreach (var player in Players.Values)
                 {
                     if (player.IsPlaying)
                     {
                         nonFolders++;
                     }
                     if (nonFolders >= 2)
-                        return false;
+                        return GameEndType.None;
                 }
-            }   
-            return true;
+            }
+            return GameEndType.WinByFold;
         }
 
         public void HandleGameEnd()
@@ -179,6 +196,13 @@ namespace TexasHoldemServer.Core.Game
             SBlind = Button.GetNext();
             BBlind = SBlind.GetNext();
             PlayerToAct = BBlind.GetNext();
+
+            orbitEnd = PlayerToAct.GetPrevious().Value;
+        }
+
+        public void RefreshGame()
+        {
+            //throw new NotImplementedException();
         }
     }
 }

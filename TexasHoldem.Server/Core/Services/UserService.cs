@@ -3,10 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TexasHoldemServer.DAL;
-using TexasHoldemServer.DAL.Models;
+using TexasHoldem.Server.DAL;
+using TexasHoldem.Server.DAL.Models;
 
-namespace TexasHoldemServer.Core.Services
+namespace TexasHoldem.Server.Core.Services
 {
     public interface IUserService
     {

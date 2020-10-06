@@ -49,29 +49,30 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Gilroy Light", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.label1.Location = new System.Drawing.Point(32, 73);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(79, 17);
+            this.label1.Size = new System.Drawing.Size(77, 18);
             this.label1.TabIndex = 1;
             this.label1.Text = "Username";
             // 
             // UsernameTextB
             // 
             this.UsernameTextB.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(242)))), ((int)(((byte)(242)))), ((int)(((byte)(242)))));
-            this.UsernameTextB.Font = new System.Drawing.Font("SF UI Display Light", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.UsernameTextB.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.UsernameTextB.Location = new System.Drawing.Point(32, 93);
             this.UsernameTextB.Name = "UsernameTextB";
-            this.UsernameTextB.Size = new System.Drawing.Size(278, 22);
+            this.UsernameTextB.Size = new System.Drawing.Size(278, 21);
             this.UsernameTextB.TabIndex = 2;
+            this.UsernameTextB.KeyDown += new System.Windows.Forms.KeyEventHandler(this.UsernameTextB_KeyDown);
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Gilroy Light", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.label2.Location = new System.Drawing.Point(32, 120);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(76, 17);
+            this.label2.Size = new System.Drawing.Size(75, 18);
             this.label2.TabIndex = 1;
             this.label2.Text = "Password";
             // 
@@ -85,24 +86,25 @@
             this.PasswordTextB.TabIndex = 2;
             this.PasswordTextB.UseSystemPasswordChar = true;
             this.PasswordTextB.WordWrap = false;
+            this.PasswordTextB.KeyDown += new System.Windows.Forms.KeyEventHandler(this.PasswordTextB_KeyDown);
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Gilroy Light", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.label3.Location = new System.Drawing.Point(159, 204);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(24, 14);
+            this.label3.Size = new System.Drawing.Size(25, 15);
             this.label3.TabIndex = 1;
             this.label3.Text = "OR";
             // 
             // RememberMeCheckB
             // 
             this.RememberMeCheckB.AutoSize = true;
-            this.RememberMeCheckB.Font = new System.Drawing.Font("Gilroy Light", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.RememberMeCheckB.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.RememberMeCheckB.Location = new System.Drawing.Point(32, 169);
             this.RememberMeCheckB.Name = "RememberMeCheckB";
-            this.RememberMeCheckB.Size = new System.Drawing.Size(143, 18);
+            this.RememberMeCheckB.Size = new System.Drawing.Size(145, 19);
             this.RememberMeCheckB.TabIndex = 3;
             this.RememberMeCheckB.Text = "Remember password";
             this.RememberMeCheckB.UseVisualStyleBackColor = true;
@@ -123,7 +125,7 @@
             this.panel1.Controls.Add(this.label2);
             this.panel1.Controls.Add(this.UsernameTextB);
             this.panel1.Controls.Add(this.label1);
-            this.panel1.Font = new System.Drawing.Font("Gilroy Light", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.panel1.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.panel1.Location = new System.Drawing.Point(32, 32);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(343, 242);
@@ -132,7 +134,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("Gilroy Light", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.label4.ForeColor = System.Drawing.Color.Gray;
             this.label4.Location = new System.Drawing.Point(77, 28);
             this.label4.Name = "label4";
@@ -146,7 +148,7 @@
             this.SignupFButton.FlatAppearance.BorderSize = 0;
             this.SignupFButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(247)))), ((int)(((byte)(255)))));
             this.SignupFButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.SignupFButton.Font = new System.Drawing.Font("Gilroy Light", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.SignupFButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.SignupFButton.Location = new System.Drawing.Point(189, 193);
             this.SignupFButton.Name = "SignupFButton";
             this.SignupFButton.Size = new System.Drawing.Size(144, 34);
@@ -161,7 +163,7 @@
             this.LoginFButton.FlatAppearance.BorderSize = 0;
             this.LoginFButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(247)))), ((int)(((byte)(255)))));
             this.LoginFButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.LoginFButton.Font = new System.Drawing.Font("Gilroy Light", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.LoginFButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.LoginFButton.Location = new System.Drawing.Point(9, 193);
             this.LoginFButton.Name = "LoginFButton";
             this.LoginFButton.Size = new System.Drawing.Size(144, 34);

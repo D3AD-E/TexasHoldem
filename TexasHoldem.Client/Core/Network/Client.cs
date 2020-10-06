@@ -120,7 +120,7 @@ namespace TexasHoldem.Client.Core.Network
             {
                 if (msg is ServerMessageBase)
                 {
-                    var args = new MesssageReceivedEventArgs(msg as ServerMessageBase);
+                    var args = new MessageReceivedEventArgs(msg as ServerMessageBase);
                     MessageReceived?.Invoke(args);
                 }
             }

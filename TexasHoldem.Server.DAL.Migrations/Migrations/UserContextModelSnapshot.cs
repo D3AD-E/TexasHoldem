@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using TexasHoldemServer.DAL;
+using TexasHoldem.Server.DAL;
 
-namespace TexasHoldemServer.DAL.Migrations.Migrations
+namespace TexasHoldem.Server.DAL.Migrations.Migrations
 {
     [DbContext(typeof(UserContext))]
     partial class UserContextModelSnapshot : ModelSnapshot

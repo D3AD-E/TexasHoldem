@@ -15,7 +15,7 @@ namespace TexasHoldemCommonAssembly.Game.Entities
 
         public PlayerBase()
         {
-            Money = 1000;
+            //Money = 1000;
         }
     }
 }

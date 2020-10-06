@@ -35,6 +35,7 @@ namespace TexasHoldem.Client
 
         private void StartupLoginForm_Load(object sender, EventArgs e)
         {
+            ActiveControl = UsernameTextB;
         }
 
         private void SignupFButton_Click(object sender, EventArgs e) //maybe not hide
@@ -65,7 +66,7 @@ namespace TexasHoldem.Client
             Properties.Settings.Default.Save();
         }
 
-        private async void LoginFButton_ClickAsync(object sender, EventArgs e)
+        private async Task Login()
         {
             if (string.IsNullOrEmpty(UsernameTextB.Text))
             {
@@ -84,27 +85,32 @@ namespace TexasHoldem.Client
                             return;
                         }
                         _client.RequestAuthenticate(UsernameTextB.Text, PasswordTextB.Text, (senderClient, res) =>
+                        {
+                            EnableControls(true);
+                            if (res.HasError)
                             {
-                                EnableControls(true);
-                                if (res.HasError)
+                                InvokeUI(() =>
                                 {
-                                    InvokeUI(() =>
-                                    {
-                                        errorProvider.SetError(PasswordTextB, res.Exception.Message);
-                                    });
-                                }
-                                else
-                                {
-                                    RememberSettings();
-                                    IsUserAuthenticated = true;
-                                    Money = res.Money;
-                                    Username = UsernameTextB.Text;
-                                    InvokeUI(() => this.Close());
-                                    
-                                }
-                            });
+                                    errorProvider.SetError(PasswordTextB, res.Exception.Message);
+                                });
+                            }
+                            else
+                            {
+                                RememberSettings();
+                                IsUserAuthenticated = true;
+                                Money = res.Money;
+                                Username = UsernameTextB.Text;
+                                InvokeUI(() => this.Close());
+
+                            }
+                        });
                     });
             }
+        }
+
+        private async void LoginFButton_ClickAsync(object sender, EventArgs e)
+        {
+            await Login();
         }
 
         private void EnableControls(bool enabled)
@@ -140,6 +146,24 @@ namespace TexasHoldem.Client
         private void InvokeUI(Action action)
         {
             this.Invoke(action);
+        }
+
+        private void UsernameTextB_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter || e.KeyCode == Keys.Down)
+            {
+                e.SuppressKeyPress = true;
+                ActiveControl = PasswordTextB;
+            }
+        }
+
+        private void PasswordTextB_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.SuppressKeyPress = true;
+                Login().ConfigureAwait(false);
+            }
         }
     }
 }

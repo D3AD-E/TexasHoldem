@@ -1,18 +1,18 @@
-﻿using BCrypt.Net;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Threading.Tasks;
+using TexasHoldem.Server.Enums;
+using TexasHoldem.Server.Utils;
 using TexasHoldemCommonAssembly.Enums;
 using TexasHoldemCommonAssembly.Game.Entities;
 using TexasHoldemCommonAssembly.Network.Message;
 using TexasHoldemCommonAssembly.Network.Message.Base;
-using TexasHoldemServer.Utils;
 
-namespace TexasHoldemServer.Core.Network
+namespace TexasHoldem.Server.Core.Network
 {
     public class Receiver
     {
@@ -27,13 +27,15 @@ namespace TexasHoldemServer.Core.Network
         public Guid ID { get; private set; }
         //public Guid ConnectedRoomID { get; private set; }
 
-        private GameLogic Game;
+        public GameLogic Game { get; private set; }
 
         public Queue<MessageBase> MessageQueue { get; private set; }
 
         public long TotalBytesUsage { get; set; }
 
         public TcpClient Client { get; set; }
+
+        public int Place { get; private set; } 
 
         private string CurrentPhrase;
 
@@ -83,7 +85,6 @@ namespace TexasHoldemServer.Core.Network
                 if (MessageQueue.Count > 0)
                 {
                     var message = MessageQueue.Dequeue();
-
                     try
                     {
                         BinaryFormatter f = new BinaryFormatter();
@@ -123,9 +124,17 @@ namespace TexasHoldemServer.Core.Network
                 Thread.Sleep(30);
             }
         }
+
         private void DisconnectFromRoom()
         {
-            Game.HandlePlayerAction(ID, PlayerAction.Fold, 0);
+            if(Game.IsGameInProcess)
+            {
+                PlayerActionHandlerAsync(PlayerAction.Fold, 0).ConfigureAwait(false);
+            }
+            else
+            {
+                Game.PlayerDisconnected(Place);
+            }
             //await money change
             Game = null;
         }
@@ -152,17 +161,9 @@ namespace TexasHoldemServer.Core.Network
             }
             else if (UserAuthenticated)
             {
-                if (type == typeof(ForceStart))
-                {
-                    ForceStartHandler();
-                }
-                else if (type == typeof(PlayerActionClient))
+                if (type == typeof(PlayerActionClient))
                 {
                     PlayerActionHandlerAsync(msg as PlayerActionClient).ConfigureAwait(false);
-                }
-                else if (type == typeof(JoinRequest))
-                {
-                    JoinHandler(msg as JoinRequest);
                 }
                 else if (type == typeof(ShowRoomsRequest))
                 {
@@ -188,7 +189,6 @@ namespace TexasHoldemServer.Core.Network
                 {
                     DisconnectFromRoom();
                 }
-
             }
             else
             {
@@ -217,7 +217,7 @@ namespace TexasHoldemServer.Core.Network
         private async Task AddMoneyRequestHandlerAsync(AddMoneyRequest req)
         {
             var res = new AddMoneyResponse(req);
-            if(string.Compare(CurrentPhrase, req.Phrase)==0)
+            if (string.Compare(CurrentPhrase, req.Phrase) == 0)
             {
                 try
                 {
@@ -227,7 +227,6 @@ namespace TexasHoldemServer.Core.Network
                 }
                 catch (Exception ex)
                 {
-
                     res.HasError = true;
                     res.Exception = ex;
                 }
@@ -245,7 +244,7 @@ namespace TexasHoldemServer.Core.Network
             try
             {
                 Game = Server.CreateRoom(req.Name, req.MaxPlayers);
-                JoinHandler(req);
+                JoinHandlerAsync(req).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -260,10 +259,10 @@ namespace TexasHoldemServer.Core.Network
         {
             try
             {
-                if(Server.Games.ContainsKey(req.RoomId))
+                if (Server.Games.ContainsKey(req.RoomId))
                 {
                     Game = Server.Games[req.RoomId];
-                    JoinHandler(req);
+                    JoinHandlerAsync(req).ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
@@ -298,7 +297,7 @@ namespace TexasHoldemServer.Core.Network
                 error = !BCrypt.Net.BCrypt.Verify(req.Password, user.Password);
             }
 
-            if(error)
+            if (error)
             {
                 AuthenticateResponse res = new AuthenticateResponse(req)
                 {
@@ -321,9 +320,8 @@ namespace TexasHoldemServer.Core.Network
 
         private async Task RegisterHandler(SignUpRequest req)
         {
-            
             string password = req.Password;
-            if (req.Username.Length>20|| req.Username.Length < 3 || password.Length < 8 || !password.Any(char.IsDigit) || !password.Any(char.IsDigit) || password.Length>50)
+            if (req.Username.Length > 20 || req.Username.Length < 3 || password.Length < 8 || !password.Any(char.IsDigit) || !password.Any(char.IsDigit) || password.Length > 50)
             {
                 var res = new SignUpResponse(req)
                 {
@@ -336,7 +334,7 @@ namespace TexasHoldemServer.Core.Network
 
             var user = await Server.Service.GetUser(req.Username);
 
-            if (user!= null)
+            if (user != null)
             {
                 var res = new SignUpResponse(req)
                 {
@@ -353,7 +351,7 @@ namespace TexasHoldemServer.Core.Network
                     var res = new SignUpResponse(req);
                     SendMessage(res);
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     var res = new SignUpResponse(req)
                     {
@@ -364,57 +362,56 @@ namespace TexasHoldemServer.Core.Network
                 }
             }
         }
-        private void JoinHandler(RoomRequestsMessageBase req)
+
+        private async Task JoinHandlerAsync(RoomRequestsMessageBase req)
         {
             Console.WriteLine("Someone tried to join");
+            var user = await Server.Service.GetUser(Username);
+
+            var players = Game.GetPlayers();
+            Place = Game.AddPlayer(ID, user.Username, user.Money, this);
+
+            if(Place == -1)
+            {
+                JoinResponse resErr = new JoinResponse(req)
+                {
+                    HasError = true,
+                    Exception = new Exception("No available places")
+                };
+                SendMessage(resErr);
+                return;
+            }
 
             JoinResponse res = new JoinResponse(req)
             {
-                PlayersInRoom = Game.GetPlayers(),
-                YourPlace = Game.AddPlayer(ID, this.Username),
+                PlayersInRoom = players,
+                YourPlace = Place,
                 PotSize = Game.PotSize,
             };
+
             SendMessage(res);
+
             if (!res.HasError)
             {
-                NewPlayerJoinedServer newPlayerJoinedMsg = new NewPlayerJoinedServer
+                var newPlayerJoinedMsg = new NewPlayerJoinedServer
                 {
                     Player = new PlayerBase
                     {
-                        Username = this.Username,
+                        Username = user.Username,
                         Place = res.YourPlace,
+                        Money = user.Money
                     }
                 };
-                Server.SendMessageToAllExcept(newPlayerJoinedMsg, this);
-            }
-        }
+                Server.SendMessageToAllExcept(newPlayerJoinedMsg, this, Game);
 
-        [Obsolete]
-        private void JoinHandler(JoinRequest req)
-        {
-            Console.WriteLine("Someone tried to join");
-            JoinResponse res = new JoinResponse(req)
-            {
-                PlayersInRoom = Game.GetPlayers(),
-                YourPlace = Game.AddPlayer(ID, req.Username),
-                PotSize = Game.PotSize,
-            };
-            SendMessage(res);
-            if (!res.HasError)
-            {
-                NewPlayerJoinedServer newPlayerJoinedMsg = new NewPlayerJoinedServer
+                if (!Game.IsGameInProcess && Game.GetAllPlayers().Count > 1)
                 {
-                    Player = new PlayerBase
-                    {
-                        Username = req.Username,
-                        Place = res.YourPlace,
-                    }
-                };
-                Server.SendMessageToAllExcept(newPlayerJoinedMsg, this);
+                    await StartNewGameWithDelay(500);
+                }
             }
         }
 
-        private void ForceStartHandler()
+        private void StartGame()
         {
             Game.Start();
             for (int i = 0; i < Server.Receivers.Count; i++)
@@ -436,70 +433,92 @@ namespace TexasHoldemServer.Core.Network
                 PlayerToAct = Game.GetCurrentPlayerPlace(),
                 BBBet = Game.BBlindBet
             };
-            Server.SendMessageToAll(gameInfo);
+            Server.SendMessageToAll(gameInfo, Game);
         }
 
         private async Task PlayerActionHandlerAsync(PlayerActionClient msg)        //REDO
         {
-            if (Game.HandlePlayerAction(ID, msg.Action, msg.RaiseAmount))
+            await PlayerActionHandlerAsync(msg.Action, msg.RaiseAmount);
+        }
+
+        public void CurrentPlayerFoldByTime()
+        {
+            PlayerActionHandlerAsync(PlayerAction.Fold, 0).ConfigureAwait(false);
+        }
+
+        private async Task PlayerActionHandlerAsync(PlayerAction action, double raiseAmount)
+        {
+            if (Game.HandlePlayerAction(ID, action, raiseAmount))
             {
                 PlayerActionServer playerActionMsg = new PlayerActionServer
                 {
-                    Action = msg.Action,
-                    RaiseAmount = msg.RaiseAmount,
+                    Action = action,
+                    RaiseAmount = raiseAmount,
                     PlayerPos = Game.GetCurrentPlayerPlace()
                 };
-                Server.SendMessageToAllExcept(playerActionMsg, this);
-                Console.WriteLine("Player " + msg.Action);
+                Server.SendMessageToAllExcept(playerActionMsg, this, Game);
+                Console.WriteLine("Player " + action);
 
-                var Cards = Game.GetPendingCardsIfAny();
-                if (Cards != null && Cards.Count()!=0)
-                {
-                    var cardMsg = new CardInfoServer
-                    {
-                        Cards = Cards,
-                        ToHand = false
-                    };
-                    Server.SendMessageToAll(cardMsg);
-                    Console.WriteLine("Sent cards to board");
-                }
-                else if (Game.HasGameEnded())
+                var endType = Game.HasGameEnded();
+                if (endType != GameEndType.None)
                 {
                     var allPlayers = Game.GetAllPlayers();
+
                     foreach (var player in allPlayers)
                     {
                         var user = await Server.Service.GetUser(player.Username);
                         user.Money = player.Money;
                         await Server.Service.UpdateUser(user);
 
-                        if(player.IsPlaying)
-                        {
-                            var gameEndMsg = new GameEndServer
-                            {
-                                Cards = player.Hand.ToList(),
-                                Place = player.Place,
-                                Showdown = true
-                            };
-                            Server.SendMessageToAllExcept(gameEndMsg, player.ID);
-                        }
+                        if (player.IsDisconnected)
+                            Game.PlayerDisconnected(player.Place);
                     }
 
+                    if (endType == GameEndType.Showdown)
+                        foreach (var player in allPlayers)
+                        {
+                            if (player.IsPlaying)
+                            {
+                                var gameEndMsg = new GameEndServer
+                                {
+                                    Cards = player.Hand.ToList(),
+                                    Place = player.Place,
+                                    Showdown = true
+                                };
+                                Server.SendMessageToAllExcept(gameEndMsg, player.ID, Game);
+                            }
+                        }
 
-                    //var activePlayers = Game.GetActivePlayers();
-                    //foreach (var player in activePlayers)
-                    //{
-                    //    var gameEndMsg = new GameEndServer
-                    //    {
-                    //        Cards = player.Hand.ToList(),
-                    //        Place = player.Place,
-                    //        Showdown = true
-                    //    };
-                    //    Server.SendMessageToAllExcept(gameEndMsg, player.ID);
-                    //}
+                    await StartNewGameWithDelay();
+                    return;
+                }
+                else
+                {
+                    var Cards = Game.GetPendingCardsIfAny();
+                    if (Cards != null && Cards.Count() != 0)
+                    {
+                        var cardMsg = new CardInfoServer
+                        {
+                            Cards = Cards,
+                            ToHand = false
+                        };
+                        Server.SendMessageToAll(cardMsg, Game);
+                        Console.WriteLine("Sent cards to board");
+                    }
+                    else
+                    {
+                        Game.CurrentPlayerAfkTimerStart();
+                    }
                 }
             }
             else
                 Console.WriteLine("Action failed");
+        }
+
+        private async Task StartNewGameWithDelay(int delay = 3000)
+        {
+            await Task.Delay(delay);
+            StartGame();
         }
     }
 }

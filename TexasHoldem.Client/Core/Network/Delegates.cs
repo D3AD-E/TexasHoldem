@@ -6,6 +6,6 @@ namespace TexasHoldem.Client.Core.Network
 {
     public class Delegates
     {
-        public delegate void MessageReceivedDelegate(MesssageReceivedEventArgs args);
+        public delegate void MessageReceivedDelegate(MessageReceivedEventArgs args);
     }
 }
