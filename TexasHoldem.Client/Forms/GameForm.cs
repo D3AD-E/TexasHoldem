@@ -19,7 +19,7 @@ namespace TexasHoldem.Client
     {
         private readonly Core.Network.Client _client;
 
-        private Timer AfkTimer;
+        private System.Timers.Timer AfkTimer;
 
         private List<Card> Board;
 
@@ -256,6 +256,19 @@ namespace TexasHoldem.Client
                 PotSizeLabel.Text = PotSize.ToString();
             });
 
+            InvokeUI(() => PlayerDisplays[PlayerController.PlayerToAct.Value].SetupPlayerAfkAwaiting());
+            if (AfkTimer == null)
+            {
+                AfkTimer = new System.Timers.Timer();
+                AfkTimer.Enabled = true;
+                AfkTimer.Start();
+                AfkTimer.Interval = TIMER_INTERVAL;
+                AfkTimer.Elapsed += new System.Timers.ElapsedEventHandler(AfkTimer_Tick);
+            }
+            else
+            {
+                AfkTimer.Start();
+            }
             ActionButtonsBehaviour(PlayerController.IsCurrentPlayerTurn(CurrentPlayer.Place));
         }
 
@@ -535,6 +548,9 @@ namespace TexasHoldem.Client
 
         private void HandlePlayerAction(int place, PlayerAction action, double raiseAmount = 0)
         {
+            PlayerDisplays[PlayerController.PlayerToAct.Value].RefreshPlayerAfk();
+            AfkTimer.Stop();
+
             string actionStr = action.ToString();
             if (raiseAmount != 0)
             {
@@ -568,18 +584,18 @@ namespace TexasHoldem.Client
                 else
                 {
                     PlayerDisplays[PlayerController.PlayerToAct.Value].SetupPlayerAfkAwaiting();
-                    if (AfkTimer == null)
-                    {
-                        AfkTimer = new Timer();
-                        AfkTimer.Enabled = true;
-                        AfkTimer.Start();
-                        AfkTimer.Interval = TIMER_INTERVAL;
-                        AfkTimer.Tick += new EventHandler(AfkTimer_Tick);
-                    }
-                    else
-                    {
-                        AfkTimer.Start();
-                    }
+                    //if (AfkTimer == null)
+                    //{
+                    //    AfkTimer = new Timer();
+                    //    AfkTimer.Enabled = true;
+                    //    AfkTimer.Start();
+                    //    AfkTimer.Interval = TIMER_INTERVAL;
+                    //    AfkTimer.Tick += new EventHandler(AfkTimer_Tick);
+                    //}
+                    //else
+                    //{
+                    //    AfkTimer.Start();
+                    //}
                 }
 
                 RefreshPlayerDisplay(place, actionStr);
@@ -588,7 +604,7 @@ namespace TexasHoldem.Client
             }
         }
 
-        private void AfkTimer_Tick(object sender, EventArgs e)
+        private void AfkTimer_Tick(object sender, System.Timers.ElapsedEventArgs e)
         {
             int playerToActPlace = PlayerController.PlayerToAct.Value;
             if (PlayerDisplays[playerToActPlace].IncreasePlayerAfk(1))

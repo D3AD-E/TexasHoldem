@@ -35,7 +35,7 @@ namespace TexasHoldem.Server.Core.Network
 
         public TcpClient Client { get; set; }
 
-        public int Place { get; private set; } 
+        public int Place { get; private set; }
 
         private string CurrentPhrase;
 
@@ -127,7 +127,7 @@ namespace TexasHoldem.Server.Core.Network
 
         private void DisconnectFromRoom()
         {
-            if(Game.IsGameInProcess)
+            if (Game.IsGameInProcess)
             {
                 PlayerActionHandlerAsync(PlayerAction.Fold, 0).ConfigureAwait(false);
             }
@@ -371,7 +371,7 @@ namespace TexasHoldem.Server.Core.Network
             var players = Game.GetPlayers();
             Place = Game.AddPlayer(ID, user.Username, user.Money, this);
 
-            if(Place == -1)
+            if (Place == -1)
             {
                 JoinResponse resErr = new JoinResponse(req)
                 {
@@ -414,15 +414,16 @@ namespace TexasHoldem.Server.Core.Network
         private void StartGame()
         {
             Game.Start();
-            for (int i = 0; i < Server.Receivers.Count; i++)
+            var players = Game.GetAllPlayers();
+            foreach (var player in players)
             {
                 var msg = new CardInfoServer
                 {
-                    Cards = Game.DealCardsToHand(i),
+                    Cards = Game.DealCardsToHand(player),
                     ToHand = true,
-                    Place = i
+                    Place = player.Place
                 };
-                Server.Receivers[i].SendMessage(msg);
+                player.ClientReceiver.SendMessage(msg);
             }
             Console.WriteLine("Started a game");
 
@@ -450,6 +451,8 @@ namespace TexasHoldem.Server.Core.Network
         {
             if (Game.HandlePlayerAction(ID, action, raiseAmount))
             {
+                Game.CurrentPlayerAfkTimerStop();
+
                 PlayerActionServer playerActionMsg = new PlayerActionServer
                 {
                     Action = action,
@@ -458,45 +461,45 @@ namespace TexasHoldem.Server.Core.Network
                 };
                 Server.SendMessageToAllExcept(playerActionMsg, this, Game);
                 Console.WriteLine("Player " + action);
-
-                var endType = Game.HasGameEnded();
-                if (endType != GameEndType.None)
+                if (Game.HasOrbitEnded())
                 {
-                    var allPlayers = Game.GetAllPlayers();
-
-                    foreach (var player in allPlayers)
+                    var endType = Game.HasGameEnded();
+                    if (endType != GameEndType.None)
                     {
-                        var user = await Server.Service.GetUser(player.Username);
-                        user.Money = player.Money;
-                        await Server.Service.UpdateUser(user);
+                        var allPlayers = Game.GetAllPlayers();
 
-                        if (player.IsDisconnected)
-                            Game.PlayerDisconnected(player.Place);
-                    }
-
-                    if (endType == GameEndType.Showdown)
                         foreach (var player in allPlayers)
                         {
-                            if (player.IsPlaying)
-                            {
-                                var gameEndMsg = new GameEndServer
-                                {
-                                    Cards = player.Hand.ToList(),
-                                    Place = player.Place,
-                                    Showdown = true
-                                };
-                                Server.SendMessageToAllExcept(gameEndMsg, player.ID, Game);
-                            }
+                            var user = await Server.Service.GetUser(player.Username);
+                            user.Money = player.Money;
+                            await Server.Service.UpdateUser(user);
+
+                            if (player.IsDisconnected)
+                                Game.PlayerDisconnected(player.Place);
                         }
 
-                    await StartNewGameWithDelay();
-                    return;
-                }
-                else
-                {
-                    var Cards = Game.GetPendingCardsIfAny();
-                    if (Cards != null && Cards.Count() != 0)
+                        if (endType == GameEndType.Showdown)
+                            foreach (var player in allPlayers)
+                            {
+                                if (player.IsPlaying)
+                                {
+                                    var gameEndMsg = new GameEndServer
+                                    {
+                                        Cards = player.Hand.ToList(),
+                                        Place = player.Place,
+                                        Showdown = true
+                                    };
+                                    Server.SendMessageToAllExcept(gameEndMsg, player.ID, Game);
+                                }
+                            }
+
+                        await StartNewGameWithDelay();
+                        return;
+                    }
+                    else
                     {
+                        var Cards = Game.GetPendingCards();
+
                         var cardMsg = new CardInfoServer
                         {
                             Cards = Cards,
@@ -505,10 +508,10 @@ namespace TexasHoldem.Server.Core.Network
                         Server.SendMessageToAll(cardMsg, Game);
                         Console.WriteLine("Sent cards to board");
                     }
-                    else
-                    {
-                        Game.CurrentPlayerAfkTimerStart();
-                    }
+                }
+                else
+                {
+                    Game.CurrentPlayerAfkTimerStart();
                 }
             }
             else

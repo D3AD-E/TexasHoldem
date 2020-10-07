@@ -35,7 +35,8 @@ namespace TexasHoldem.Client
         }
         public bool IncreasePlayerAfk(int by)
         {
-            AfkProgressBar.Value += by;
+            InvokeUI(() => AfkProgressBar.Value += by);
+            
             if (AfkProgressBar.Value == AfkProgressBar.Maximum)
             {
                 return true;
@@ -45,14 +46,25 @@ namespace TexasHoldem.Client
         }
         public void RefreshPlayerAfk()
         {
-            AfkProgressBar.Value = 0;
-            AfkProgressBar.Hide();
-            ActionLabel.Show();
+            InvokeUI(() =>
+            {
+                AfkProgressBar.Value = 0;
+                AfkProgressBar.Hide();
+                ActionLabel.Show();
+            });
         }
         public void SetupPlayerAfkAwaiting()
         {
-            AfkProgressBar.Show();
-            ActionLabel.Hide();
+            InvokeUI(() =>
+            {
+                AfkProgressBar.Show();
+                ActionLabel.Hide();
+            });
+        }
+
+        private void InvokeUI(Action action)
+        {
+            this.Invoke(action);
         }
     }
 }

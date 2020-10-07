@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using TexasHoldemCommonAssembly.Enums;
-using TexasHoldemCommonAssembly.Game.Entities;
+using System.Timers;
 using TexasHoldem.Server.Core.Game;
 using TexasHoldem.Server.Core.Game.Entities;
-using TexasHoldem.Server.DAL.Models;
-using TexasHoldem.Server.Enums;
-using System.Threading;
-using System.Timers;
 using TexasHoldem.Server.Core.Network;
+using TexasHoldem.Server.Enums;
+using TexasHoldemCommonAssembly.Enums;
+using TexasHoldemCommonAssembly.Game.Entities;
 
 namespace TexasHoldem.Server
 {
@@ -19,9 +17,9 @@ namespace TexasHoldem.Server
 
         public List<Card> Board { get; private set; }
 
-        private  PlayerActionController PlayerController { get; set; }
+        private PlayerActionController PlayerController { get; set; }
 
-        public double PotSize { get;  private set; }
+        public double PotSize { get; private set; }
 
         public double BBlindBet { get; private set; }
 
@@ -39,7 +37,7 @@ namespace TexasHoldem.Server
 
         private const int DECK_SIZE = 52;
 
-        private const int PLAYER_AFK_DELAY = 15;//in sec
+        private const int PLAYER_AFK_DELAY = 15000;//in ms
 
         public GameLogic(string name, int maxPlayerAmount)
         {
@@ -68,7 +66,7 @@ namespace TexasHoldem.Server
                 }
         }
 
-        public List<Card> DealCardsToHand(int place)
+        public List<Card> DealCardsToHand(PlayerData player)
         {
             var rand = new Random();
             int cardNum;
@@ -79,7 +77,7 @@ namespace TexasHoldem.Server
                 {
                     cardNum = rand.Next(52);
                 } while (Deck[cardNum].IsDrawn);
-                PlayerController.Players[place].Hand[i] = Deck[cardNum];
+                player.Hand[i] = Deck[cardNum];
                 toret.Add(Deck[cardNum]);
                 Deck[cardNum].IsDrawn = true;
             }
@@ -96,7 +94,7 @@ namespace TexasHoldem.Server
             {
                 cardsAmount = 3;
             }
-            else if(state == GameState.Showdown)
+            else if (state == GameState.Showdown)
             {
                 return null;
             }
@@ -123,10 +121,12 @@ namespace TexasHoldem.Server
 
             player.Holding = new Holding(toDetermine);
         }
+
         public List<PlayerData> GetAllPlayers()
         {
             return PlayerController.Players.Values.ToList();
         }
+
         public List<PlayerData> GetActivePlayers()
         {
             List<PlayerData> suitablePlayers = new List<PlayerData>();
@@ -211,15 +211,10 @@ namespace TexasHoldem.Server
                 return false;
         }
 
-        public List<Card> GetPendingCardsIfAny()
+        public List<Card> GetPendingCards()
         {
-            if (PlayerController.HasOrbitEnded() || PlayerController.GameState == GameState.Showdown)
-            {
-                CurrentBet = 0;
-                return DealCardsToBoard(PlayerController.GameState);
-            }
-            else
-                return null;
+            CurrentBet = 0;
+            return DealCardsToBoard(PlayerController.GameState);
         }
 
         public void Start()
@@ -243,9 +238,9 @@ namespace TexasHoldem.Server
 
         public int AddPlayer(Guid id, string username, double money, Receiver receiver)
         {
-            for(int i =0; i<8;i++)
+            for (int i = 0; i < 8; i++)
             {
-                if(!PlayerController.Players.ContainsKey(i))
+                if (!PlayerController.Players.ContainsKey(i))
                 {
                     PlayerController.Players.Add(i, new PlayerData(id, i, username, money, receiver));
                     CurrentPlayerAmount++;
@@ -253,14 +248,13 @@ namespace TexasHoldem.Server
                 }
             }
 
-            
             return -1;
         }
 
         public List<PlayerBase> GetPlayers() //??????????????????? does not work otherwise, cast from linq
         {
             List<PlayerBase> toret = new List<PlayerBase>();
-            foreach(var player in PlayerController.Players.Values)
+            foreach (var player in PlayerController.Players.Values)
             {
                 toret.Add(new PlayerBase() { Money = player.Money, Place = player.Place, Username = player.Username });
             }
@@ -281,6 +275,12 @@ namespace TexasHoldem.Server
             {
                 AfkTimer.Start();
             }
+        }
+
+        public void CurrentPlayerAfkTimerStop()
+        {
+            if (AfkTimer != null)
+                AfkTimer.Stop();
         }
 
         public void PlayerDisconnected(int place)
@@ -307,6 +307,11 @@ namespace TexasHoldem.Server
         public int GetButtonPlace()
         {
             return PlayerController.Button.Value;
+        }
+
+        public bool HasOrbitEnded()
+        {
+            return PlayerController.HasOrbitEnded();
         }
     }
 }

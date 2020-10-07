@@ -72,7 +72,7 @@ namespace TexasHoldem.Client.Core.Game
             else if (action == PlayerAction.Raise)
             {
                 PlayerToHandle.Money -= moneyToSubstract;
-                orbitEnd = PlayerToAct.GetPrevious().Value;
+                orbitEnd = GetPreviuosPlayingPlace(PlayerToAct).Value;
             }
             else if (action == PlayerAction.Check)
             {
@@ -85,14 +85,28 @@ namespace TexasHoldem.Client.Core.Game
         private Place GetNextPlayingPlace(Place from)
         {
             Place toret = from;
-            while (true)
+            do
             {
                 toret++;
                 if (Players[toret.Value].IsPlaying == true)
                     return toret;
-                if (toret == from)
-                    break;
             }
+            while (toret != from);
+            return toret;
+        }
+
+        private Place GetPreviuosPlayingPlace(Place from)
+        {
+            Place toret = from;
+            do
+            {
+                toret--;
+                if (!Players.ContainsKey(toret.Value))
+                    continue;
+                if (Players[toret.Value].IsPlaying == true)
+                    return toret;
+            }
+            while (toret != from);
             return toret;
         }
 
@@ -136,7 +150,7 @@ namespace TexasHoldem.Client.Core.Game
 
         public void Setup(int bBPlace, int buttonPlace, int playerToAct, double BBBet)
         {
-            int maxVal = Players.Count;
+            int maxVal = 8;
             BBlind = new Place(bBPlace, maxVal);
             Button = new Place(buttonPlace, maxVal);
             SBlind = BBlind.GetPrevious();
