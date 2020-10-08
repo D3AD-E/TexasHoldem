@@ -92,7 +92,10 @@ namespace TexasHoldem.Server.Core.Game
             }
 
             if (bet > PlayerToHandle.Money)
-                bet = PlayerToHandle.Money;
+            {
+                bet = PlayerToHandle.CurrentBet + PlayerToHandle.Money;
+                //overBet = true;
+            }
 
             PlayerToHandle.PreviousBet = PlayerToHandle.CurrentBet;
             PlayerToHandle.CurrentBet = bet;

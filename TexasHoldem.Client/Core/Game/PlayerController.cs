@@ -37,16 +37,19 @@ namespace TexasHoldem.Client.Core.Game
         public bool HandleAction(PlayerAction action, double bet) //bug with all in
         {
             Player PlayerToHandle = Players[PlayerToAct.Value];
-
+            bool overBet = false;
             if (PlayerToHandle.Money == 0)
             {
                 PlayerToHandle.PreviousBet = 0;
                 PlayerToHandle.CurrentBet = 0;
-                return true;
+                return overBet;
             }
 
             if (bet > PlayerToHandle.Money)
-                bet = PlayerToHandle.Money;
+            {
+                bet = PlayerToHandle.CurrentBet + PlayerToHandle.Money;
+                overBet = true;
+            }
 
             PlayerToHandle.PreviousBet = PlayerToHandle.CurrentBet;
             PlayerToHandle.CurrentBet = bet;
@@ -56,16 +59,13 @@ namespace TexasHoldem.Client.Core.Game
             if (action == PlayerAction.Fold)
             {
                 PlayerToHandle.IsPlaying = false;
-                return HasOrbitEnded();
             }
-            if (action == PlayerAction.FoldByDisconnect)
+            else if (action == PlayerAction.FoldByDisconnect)
             {
                 PlayerToHandle.IsPlaying = false;
                 PlayerToHandle.IsDisconnected = true;
-                return HasOrbitEnded();
             }
-
-            if (action == PlayerAction.Call)
+            else if (action == PlayerAction.Call)
             {
                 PlayerToHandle.Money -= moneyToSubstract;
             }
@@ -78,8 +78,7 @@ namespace TexasHoldem.Client.Core.Game
             {
                 //Players[PlayerToAct.Value].PreviousBet = 0;
             }
-
-            return HasOrbitEnded();
+            return overBet;
         }
 
         private Place GetNextPlayingPlace(Place from)
@@ -88,6 +87,8 @@ namespace TexasHoldem.Client.Core.Game
             do
             {
                 toret++;
+                if (!Players.ContainsKey(toret.Value))
+                    continue;
                 if (Players[toret.Value].IsPlaying == true)
                     return toret;
             }

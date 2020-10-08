@@ -22,7 +22,7 @@ namespace TexasHoldem.Server
         public double PotSize { get; private set; }
 
         public double BBlindBet { get; private set; }
-
+        public double RaiseJump { get; private set; }
         public double CurrentBet { get; private set; }
 
         public int MaxPlayerAmount { get; private set; }
@@ -37,7 +37,7 @@ namespace TexasHoldem.Server
 
         private const int DECK_SIZE = 52;
 
-        private const int PLAYER_AFK_DELAY = 15000;//in ms
+        private const int PLAYER_AFK_DELAY = 60000;//in ms
 
         public GameLogic(string name, int maxPlayerAmount)
         {
@@ -199,10 +199,14 @@ namespace TexasHoldem.Server
             }
         }
 
-        public bool HandlePlayerAction(Guid id, PlayerAction action, double bet = 0)
+        public bool HandlePlayerAction(Guid id, PlayerAction action, double raiseAmount = 0)
         {
-            bet += CurrentBet;
-            if (PlayerController.HandleAction(id, action, bet))
+            if (raiseAmount != 0 && action == PlayerAction.Raise)
+            {
+                RaiseJump = raiseAmount - CurrentBet;
+                CurrentBet = raiseAmount;
+            }
+            if (PlayerController.HandleAction(id, action, raiseAmount))
             {
                 PotSize += PlayerController.GetMoneyToPot(PlayerController.PlayerToAct.Value);
                 return true;
@@ -291,6 +295,7 @@ namespace TexasHoldem.Server
         private void AfkTimer_Tick(object sender, ElapsedEventArgs e)
         {
             AfkTimer.Stop();
+            Console.WriteLine("fold by time");
             PlayerController.Players[PlayerController.PlayerToAct.Value].ClientReceiver.CurrentPlayerFoldByTime();
         }
 

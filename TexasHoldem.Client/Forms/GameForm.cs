@@ -35,6 +35,8 @@ namespace TexasHoldem.Client
 
         private double CurrentBet;
 
+        private double RaiseJump;
+
         private readonly PlayerController PlayerController;
 
         private int ActivePlayers;
@@ -43,7 +45,7 @@ namespace TexasHoldem.Client
 
         private const int TIMER_INTERVAL = 200;//in ms
 
-        private const int PLAYER_AFK_DELAY = 15;//in sec
+        private const int PLAYER_AFK_DELAY = 60;//in sec
 
         public GameForm(string username, double money, JoinResponse res)
         {
@@ -236,6 +238,7 @@ namespace TexasHoldem.Client
             PlayerController.Setup(msg.BBPlace, msg.ButtonPlace, msg.PlayerToAct, msg.BBBet);
             BBBet = msg.BBBet;
             CurrentBet = msg.BBBet;
+            RaiseJump = CurrentBet;
 
             PotSize = BBBet + BBBet / 2;
 
@@ -463,12 +466,26 @@ namespace TexasHoldem.Client
 
         private void ActionButtonsBehaviour(bool enabled)
         {
-            InvokeUI(() =>
+            if(enabled)
             {
-                FoldFButton.Enabled = enabled;
-                CallFButton.Enabled = enabled;
-                RaiseFButton.Enabled = enabled;
-            });
+                InvokeUI(() =>
+                {
+                    FoldFButton.Show();
+                    CallFButton.Show();
+                    RaiseFButton.Show();
+                    RaiseAmountUD.Show();
+                });
+            }
+            else
+            {
+                InvokeUI(() =>
+                {
+                    FoldFButton.Hide();
+                    CallFButton.Hide();
+                    RaiseFButton.Hide();
+                    RaiseAmountUD.Hide();
+                });
+            }
         }
 
         private void InvokeUI(Action action)
@@ -548,22 +565,24 @@ namespace TexasHoldem.Client
 
         private void HandlePlayerAction(int place, PlayerAction action, double raiseAmount = 0)
         {
-            PlayerDisplays[PlayerController.PlayerToAct.Value].RefreshPlayerAfk();
             AfkTimer.Stop();
+            PlayerDisplays[PlayerController.PlayerToAct.Value].RefreshPlayerAfk();
 
             string actionStr = action.ToString();
-            if (raiseAmount != 0)
+            if (raiseAmount != 0 && action == PlayerAction.Raise)
             {
-                actionStr += " for " + raiseAmount;
+                actionStr += " to " + raiseAmount;
+                RaiseJump = raiseAmount - CurrentBet;
+                CurrentBet = raiseAmount;
             }
 
-            CurrentBet += raiseAmount;
+            bool overBet = PlayerController.HandleAction(action, CurrentBet);
 
-            if (PlayerController.HandleAction(action, CurrentBet))
+            double addedMoney = PlayerController.GetMoneyToPot(place);
+            PotSize += addedMoney;
+
+            if(PlayerController.HasOrbitEnded())
                 GameStateChanged();
-
-            PotSize += PlayerController.GetMoneyToPot(place);
-
             if (PlayerController.HasGameEnded())
             {
                 int winnerPlace = PlayerController.GetWinnerPlace();
@@ -584,6 +603,7 @@ namespace TexasHoldem.Client
                 else
                 {
                     PlayerDisplays[PlayerController.PlayerToAct.Value].SetupPlayerAfkAwaiting();
+                    AfkTimer.Start();
                     //if (AfkTimer == null)
                     //{
                     //    AfkTimer = new Timer();
@@ -600,7 +620,31 @@ namespace TexasHoldem.Client
 
                 RefreshPlayerDisplay(place, actionStr);
                 RefreshPotDisplay();
-                ActionButtonsBehaviour(PlayerController.IsCurrentPlayerTurn(CurrentPlayer.Place));
+
+                if(PlayerController.IsCurrentPlayerTurn(CurrentPlayer.Place))
+                {
+                    ActionButtonsBehaviour(true);
+                    HandleRaizeSizeGui(overBet);
+                }
+            }
+        }
+
+        private void HandleRaizeSizeGui(bool overBet)
+        {
+            if(overBet)
+            {
+                InvokeUI(() =>
+                {
+                    RaiseAmountUD.Hide();
+                    RaiseFButton.Hide();
+                });
+            }
+            else
+            {
+                if (CurrentBet == 0)
+                    InvokeUI(() => RaiseAmountUD.Minimum = (decimal)BBBet);
+                else
+                    InvokeUI(() => RaiseAmountUD.Minimum = (decimal)(CurrentBet + RaiseJump));
             }
         }
 

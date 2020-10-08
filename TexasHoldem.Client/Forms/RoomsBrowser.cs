@@ -122,6 +122,11 @@ namespace TexasHoldem.Client.Forms
 
         private void RoomsBrowserForm_Load(object sender, EventArgs e)
         {
+            GetRooms();
+        }
+
+        private void GetRooms()
+        {
             _client.RequestShowRooms((senderClient, res) =>
             {
                 if (res.HasError)
@@ -130,6 +135,7 @@ namespace TexasHoldem.Client.Forms
                 }
                 else
                 {
+                    _rooms.Clear();
                     InvokeUI(() =>
                     {
                         RoomsListView.Items.Clear();
@@ -205,5 +211,9 @@ namespace TexasHoldem.Client.Forms
             }
         }
 
+        private void RefreshFButton_Click(object sender, EventArgs e)
+        {
+            GetRooms();
+        }
     }
 }

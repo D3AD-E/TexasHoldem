@@ -459,8 +459,10 @@ namespace TexasHoldem.Server.Core.Network
                     RaiseAmount = raiseAmount,
                     PlayerPos = Game.GetCurrentPlayerPlace()
                 };
+
                 Server.SendMessageToAllExcept(playerActionMsg, this, Game);
                 Console.WriteLine("Player " + action);
+
                 if (Game.HasOrbitEnded())
                 {
                     var endType = Game.HasGameEnded();
@@ -509,10 +511,8 @@ namespace TexasHoldem.Server.Core.Network
                         Console.WriteLine("Sent cards to board");
                     }
                 }
-                else
-                {
-                    Game.CurrentPlayerAfkTimerStart();
-                }
+
+                Game.CurrentPlayerAfkTimerStart();
             }
             else
                 Console.WriteLine("Action failed");
