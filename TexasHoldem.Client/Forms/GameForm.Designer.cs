@@ -36,7 +36,6 @@
             this.BoardCard3Img = new System.Windows.Forms.PictureBox();
             this.BoardCard4Img = new System.Windows.Forms.PictureBox();
             this.BoardCard5Img = new System.Windows.Forms.PictureBox();
-            this.PotSizeLabel = new System.Windows.Forms.Label();
             this.playerDisplay1 = new TexasHoldem.Client.PlayerDisplay();
             this.HoldingLabel = new System.Windows.Forms.Label();
             this.playerDisplay2 = new TexasHoldem.Client.PlayerDisplay();
@@ -47,6 +46,7 @@
             this.playerDisplay6 = new TexasHoldem.Client.PlayerDisplay();
             this.playerDisplay7 = new TexasHoldem.Client.PlayerDisplay();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.potsView1 = new TexasHoldem.Client.Utils.UserControls.PotsView();
             this.FoldFButton = new TexasHoldem.Client.Utils.UserControls.FlatButton();
             this.CallFButton = new TexasHoldem.Client.Utils.UserControls.FlatButton();
             this.RaiseFButton = new TexasHoldem.Client.Utils.UserControls.FlatButton();
@@ -88,7 +88,7 @@
             // BoardCard1Img
             // 
             this.BoardCard1Img.BackColor = System.Drawing.Color.Transparent;
-            this.BoardCard1Img.Location = new System.Drawing.Point(244, 199);
+            this.BoardCard1Img.Location = new System.Drawing.Point(244, 169);
             this.BoardCard1Img.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.BoardCard1Img.Name = "BoardCard1Img";
             this.BoardCard1Img.Size = new System.Drawing.Size(67, 94);
@@ -99,7 +99,7 @@
             // BoardCard2Img
             // 
             this.BoardCard2Img.BackColor = System.Drawing.Color.Transparent;
-            this.BoardCard2Img.Location = new System.Drawing.Point(319, 199);
+            this.BoardCard2Img.Location = new System.Drawing.Point(319, 169);
             this.BoardCard2Img.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.BoardCard2Img.Name = "BoardCard2Img";
             this.BoardCard2Img.Size = new System.Drawing.Size(67, 94);
@@ -110,7 +110,7 @@
             // BoardCard3Img
             // 
             this.BoardCard3Img.BackColor = System.Drawing.Color.Transparent;
-            this.BoardCard3Img.Location = new System.Drawing.Point(394, 199);
+            this.BoardCard3Img.Location = new System.Drawing.Point(394, 169);
             this.BoardCard3Img.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.BoardCard3Img.Name = "BoardCard3Img";
             this.BoardCard3Img.Size = new System.Drawing.Size(67, 94);
@@ -121,7 +121,7 @@
             // BoardCard4Img
             // 
             this.BoardCard4Img.BackColor = System.Drawing.Color.Transparent;
-            this.BoardCard4Img.Location = new System.Drawing.Point(469, 199);
+            this.BoardCard4Img.Location = new System.Drawing.Point(469, 169);
             this.BoardCard4Img.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.BoardCard4Img.Name = "BoardCard4Img";
             this.BoardCard4Img.Size = new System.Drawing.Size(67, 94);
@@ -132,7 +132,7 @@
             // BoardCard5Img
             // 
             this.BoardCard5Img.BackColor = System.Drawing.Color.Transparent;
-            this.BoardCard5Img.Location = new System.Drawing.Point(544, 199);
+            this.BoardCard5Img.Location = new System.Drawing.Point(544, 169);
             this.BoardCard5Img.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.BoardCard5Img.Name = "BoardCard5Img";
             this.BoardCard5Img.Size = new System.Drawing.Size(67, 94);
@@ -140,22 +140,11 @@
             this.BoardCard5Img.TabIndex = 8;
             this.BoardCard5Img.TabStop = false;
             // 
-            // PotSizeLabel
-            // 
-            this.PotSizeLabel.AutoSize = true;
-            this.PotSizeLabel.BackColor = System.Drawing.Color.Transparent;
-            this.PotSizeLabel.Location = new System.Drawing.Point(403, 338);
-            this.PotSizeLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.PotSizeLabel.Name = "PotSizeLabel";
-            this.PotSizeLabel.Size = new System.Drawing.Size(39, 18);
-            this.PotSizeLabel.TabIndex = 11;
-            this.PotSizeLabel.Text = "Pot: ";
-            // 
             // playerDisplay1
             // 
             this.playerDisplay1.BackColor = System.Drawing.Color.Transparent;
             this.playerDisplay1.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.playerDisplay1.Location = new System.Drawing.Point(451, 365);
+            this.playerDisplay1.Location = new System.Drawing.Point(512, 372);
             this.playerDisplay1.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.playerDisplay1.Name = "playerDisplay1";
             this.playerDisplay1.Size = new System.Drawing.Size(160, 112);
@@ -195,7 +184,7 @@
             // 
             this.playerDisplay8.BackColor = System.Drawing.Color.Transparent;
             this.playerDisplay8.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.playerDisplay8.Location = new System.Drawing.Point(226, 365);
+            this.playerDisplay8.Location = new System.Drawing.Point(210, 372);
             this.playerDisplay8.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
             this.playerDisplay8.Name = "playerDisplay8";
             this.playerDisplay8.Size = new System.Drawing.Size(160, 112);
@@ -245,6 +234,7 @@
             // 
             this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(247)))), ((int)(((byte)(255)))));
             this.panel1.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("panel1.BackgroundImage")));
+            this.panel1.Controls.Add(this.potsView1);
             this.panel1.Controls.Add(this.FoldFButton);
             this.panel1.Controls.Add(this.CallFButton);
             this.panel1.Controls.Add(this.RaiseFButton);
@@ -257,7 +247,6 @@
             this.panel1.Controls.Add(this.playerDisplay2);
             this.panel1.Controls.Add(this.HoldingLabel);
             this.panel1.Controls.Add(this.playerDisplay1);
-            this.panel1.Controls.Add(this.PotSizeLabel);
             this.panel1.Controls.Add(this.BoardCard5Img);
             this.panel1.Controls.Add(this.BoardCard4Img);
             this.panel1.Controls.Add(this.BoardCard3Img);
@@ -269,6 +258,17 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(840, 606);
             this.panel1.TabIndex = 14;
+            // 
+            // potsView1
+            // 
+            this.potsView1.BackColor = System.Drawing.Color.Transparent;
+            this.potsView1.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.potsView1.Location = new System.Drawing.Point(362, 270);
+            this.potsView1.Margin = new System.Windows.Forms.Padding(4);
+            this.potsView1.Name = "potsView1";
+            this.potsView1.Pots = null;
+            this.potsView1.Size = new System.Drawing.Size(108, 135);
+            this.potsView1.TabIndex = 15;
             // 
             // FoldFButton
             // 
@@ -358,7 +358,6 @@
         private System.Windows.Forms.PictureBox BoardCard3Img;
         private System.Windows.Forms.PictureBox BoardCard4Img;
         private System.Windows.Forms.PictureBox BoardCard5Img;
-        private System.Windows.Forms.Label PotSizeLabel;
         private PlayerDisplay playerDisplay1;
         private System.Windows.Forms.Label HoldingLabel;
         private PlayerDisplay playerDisplay2;
@@ -373,6 +372,7 @@
         private Utils.UserControls.FlatButton CallFButton;
         private Utils.UserControls.FlatButton RaiseFButton;
         private Utils.UserControls.TopBorder topBorder1;
+        private Utils.UserControls.PotsView potsView1;
     }
 }
 

@@ -223,5 +223,16 @@ namespace TexasHoldem.Server.Core.Game
         {
             //throw new NotImplementedException();
         }
+
+        public List<Player> GetPlayingPlayers()
+        {
+            var players = new List<Player>();
+            foreach (var player in Players.Values)
+            {
+                if (player.IsPlaying && player.CurrentBet != 0)
+                    players.Add(player);
+            }
+            return players;
+        }
     }
 }

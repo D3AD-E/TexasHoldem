@@ -177,6 +177,17 @@ namespace TexasHoldem.Client.Core.Game
             return amount;
         }
 
+        public List<Player> GetPlayingPlayers()
+        {
+            var players = new List<Player>();
+            foreach (var player in Players.Values)
+            {
+                if (player.IsPlaying && player.CurrentBet!=0)
+                    players.Add(player);
+            }
+            return players;
+        }
+
         public bool HasGameEnded()
         {
             return GetPlayingPlayersAmount() <= 1;

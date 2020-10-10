@@ -386,7 +386,7 @@ namespace TexasHoldem.Server.Core.Network
             {
                 PlayersInRoom = players,
                 YourPlace = Place,
-                PotSize = Game.PotSize,
+                Pots = Game.Pots,
             };
 
             SendMessage(res);
@@ -417,6 +417,14 @@ namespace TexasHoldem.Server.Core.Network
             var players = Game.GetAllPlayers();
             foreach (var player in players)
             {
+                if(player.Money == 0)
+                {
+                    Game.PlayerDisconnected(player.Place);
+                    if (players.Count < 2)
+                        throw new Exception("Not enough players");
+                    continue;
+                }
+
                 var msg = new CardInfoServer
                 {
                     Cards = Game.DealCardsToHand(player),
@@ -465,9 +473,12 @@ namespace TexasHoldem.Server.Core.Network
 
                 if (Game.HasOrbitEnded())
                 {
+                    Game.HandleOrbitEnd();
+
                     var endType = Game.HasGameEnded();
                     if (endType != GameEndType.None)
                     {
+                        Game.HandleGameEnd(endType);
                         var allPlayers = Game.GetAllPlayers();
 
                         foreach (var player in allPlayers)
@@ -476,7 +487,7 @@ namespace TexasHoldem.Server.Core.Network
                             user.Money = player.Money;
                             await Server.Service.UpdateUser(user);
 
-                            if (player.IsDisconnected)
+                            if (player.IsDisconnected || player.Money ==0)
                                 Game.PlayerDisconnected(player.Place);
                         }
 

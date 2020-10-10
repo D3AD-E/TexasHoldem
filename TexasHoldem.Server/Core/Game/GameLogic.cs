@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
+using TexasHoldem.CommonAssembly.Game.Entities;
 using TexasHoldem.Server.Core.Game;
 using TexasHoldem.Server.Core.Game.Entities;
 using TexasHoldem.Server.Core.Network;
@@ -19,7 +20,9 @@ namespace TexasHoldem.Server
 
         private PlayerActionController PlayerController { get; set; }
 
-        public double PotSize { get; private set; }
+        //public double PotSize { get; private set; }
+
+        public Stack<Pot> Pots { get; private set; }
 
         public double BBlindBet { get; private set; }
         public double RaiseJump { get; private set; }
@@ -139,49 +142,109 @@ namespace TexasHoldem.Server
             return suitablePlayers;
         }
 
-        private void HandleGameEnd()
+        public void HandleGameEnd(GameEndType gameEnd)
         {
+            PlayerController.HandleGameEnd();
             IsGameInProcess = false;
 
-            List<PlayerData> suitablePlayers = new List<PlayerData>();
-            foreach (var player in PlayerController.Players.Values)
+            if(gameEnd == GameEndType.WinByFold)
             {
-                if (!player.IsPlaying)
-                    continue;
-                DetermineHolding(player);
-                suitablePlayers.Add(player);
-            }
-            var sorted = suitablePlayers.OrderByDescending(i => i.Holding);
-
-            if (sorted.Count() == 1)
-            {
-                var Winner = sorted.First();
-                Winner.Money += PotSize;
-                PotSize = 0;
+                var player = GetActivePlayers().FirstOrDefault();
+                
+                double sum = 0;
+                while(Pots.Count>0)
+                {
+                    var pot = Pots.Pop();
+                    sum += pot.Size;
+                }
+                player.Money += sum;
                 return;
             }
 
-            var bestPlayer = sorted.First();
-
-            int winnersAmount = 0;
-
-            foreach (var player in sorted)
+            while (Pots.Count > 0)
             {
-                if (player.Holding == bestPlayer.Holding)
-                    winnersAmount++;
-                else
-                    break;
-            }
+                var pot = Pots.Pop();
+                var suitablePlayers = new List<Player>();
+                foreach (var player in pot.Players)
+                {
+                    if (!player.IsPlaying)
+                        continue;
+                    if (player.Holding == null)
+                        DetermineHolding(player);
+                    suitablePlayers.Add(player);
+                }
 
-            int i = 0;
-            foreach (var player in sorted)
-            {
-                player.Money += PotSize / winnersAmount;
-                i++;
-                if (i == winnersAmount)
-                    break;
+                var sorted = suitablePlayers.OrderByDescending(i => i.Holding);
+
+                if (sorted.Count() == 1)
+                {
+                    var Winner = sorted.First();
+                    Winner.Money += pot.Size;
+                    return;
+                }
+
+                var bestPlayer = sorted.First();
+
+                int winnersAmount = 0;
+
+                foreach (var player in sorted)
+                {
+                    if (player.Holding == bestPlayer.Holding)
+                        winnersAmount++;
+                    else
+                        break;
+                }
+
+                int i = 0;
+
+                double prize = pot.Size / winnersAmount;
+                foreach (var player in sorted)
+                {
+                    player.Money += prize;
+                    i++;
+                    if (i == winnersAmount)
+                        break;
+                }
             }
-            PotSize = 0;
+            //List<PlayerData> suitablePlayers = new List<PlayerData>();
+            //foreach (var player in PlayerController.Players.Values)
+            //{
+            //    if (!player.IsPlaying)
+            //        continue;
+            //    DetermineHolding(player);
+            //    suitablePlayers.Add(player);
+            //}
+            //var sorted = suitablePlayers.OrderByDescending(i => i.Holding);
+
+            ////if (sorted.Count() == 1)
+            ////{
+            ////    var Winner = sorted.First();
+            ////    Winner.Money += PotSize;
+            ////    PotSize = 0;
+            ////    return;
+            ////}
+
+            //var bestPlayer = sorted.First();
+
+            //int winnersAmount = 0;
+
+            //foreach (var player in sorted)
+            //{
+            //    if (player.Holding == bestPlayer.Holding)
+            //        winnersAmount++;
+            //    else
+            //        break;
+            //}
+
+            //int i = 0;
+            //foreach (var player in sorted)
+            //{
+            //    player.Money += PotSize / winnersAmount;
+            //    i++;
+            //    if (i == winnersAmount)
+            //        break;
+            //}
+            //PotSize = 0;
         }
 
         public GameEndType HasGameEnded()
@@ -193,8 +256,6 @@ namespace TexasHoldem.Server
             }
             else
             {
-                PlayerController.HandleGameEnd();
-                HandleGameEnd();
                 return endType;
             }
         }
@@ -208,7 +269,7 @@ namespace TexasHoldem.Server
             }
             if (PlayerController.HandleAction(id, action, raiseAmount))
             {
-                PotSize += PlayerController.GetMoneyToPot(PlayerController.PlayerToAct.Value);
+                Pots.Peek().Size += PlayerController.GetMoneyToPot(PlayerController.PlayerToAct.Value);
                 return true;
             }
             else
@@ -224,15 +285,22 @@ namespace TexasHoldem.Server
         public void Start()
         {
             IsGameInProcess = true;
-            RefreshGame();
+            RefreshCards();
+
+            if (Pots == null)
+                Pots = new Stack<Pot>();
+            else
+                Pots.Clear();
 
             PlayerController.SetupGame(BBlindBet);
 
             CurrentBet = BBlindBet;
-            PotSize = BBlindBet + BBlindBet / 2;
+            var pot = new Pot();
+            pot.Size= BBlindBet + BBlindBet / 2;
+            pot.Players = PlayerController.Players.Values.OfType<Player>().ToList();
         }
 
-        private void RefreshGame()
+        private void RefreshCards()
         {
             foreach (var card in Deck)
             {
@@ -253,6 +321,58 @@ namespace TexasHoldem.Server
             }
 
             return -1;
+        }
+
+        public void HandleOrbitEnd()
+        {
+            var currPot = Pots.Peek();
+
+            var players = PlayerController.GetPlayingPlayers().OrderBy(i => i.CurrentBet).ToList();
+            var player = players[0];
+
+            int playersAmount = players.Count();
+            int sameBetIndexStart = 0;
+            for (int i = 1; i < playersAmount; i++)
+            {
+                if (player.CurrentBet != players[i].CurrentBet && player.CurrentBet != 0)
+                {
+                    var pot = new Pot();
+
+                    foreach (var temp in players)
+                    {
+                        if (temp.CurrentBet != 0)
+                        {
+                            pot.Players.Add(temp);
+                            temp.CurrentBet -= player.CurrentBet;
+                        }
+                    }
+
+                    pot.Size = player.CurrentBet * pot.Players.Count();
+
+                    currPot.Size -= pot.Size;
+
+                    Pots.Push(pot);
+
+                    sameBetIndexStart = i;
+                    player = players[i];
+                }
+            }
+
+            if (sameBetIndexStart == playersAmount - 1)
+            {
+                players[sameBetIndexStart].Money += CurrentBet;
+            }
+            else
+            {
+                var pot = new Pot();
+                int playersInPot = playersAmount - sameBetIndexStart;
+                pot.Players.AddRange(players.GetRange(sameBetIndexStart, playersInPot));
+                pot.Size = players[sameBetIndexStart].CurrentBet * playersInPot;
+
+                currPot.Size -= pot.Size;
+
+                Pots.Push(pot);
+            }
         }
 
         public List<PlayerBase> GetPlayers() //??????????????????? does not work otherwise, cast from linq
