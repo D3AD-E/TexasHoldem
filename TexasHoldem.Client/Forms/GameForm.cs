@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using TexasHoldem.Client.Core.Game;
 using TexasHoldem.Client.Core.Network;
+using TexasHoldem.Client.Forms;
 using TexasHoldem.Client.Utils;
 using TexasHoldem.CommonAssembly.Game.Entities;
 using TexasHoldemCommonAssembly.Enums;
@@ -27,7 +28,7 @@ namespace TexasHoldem.Client
 
         private readonly Player CurrentPlayer;
 
-       // private double PotSize;
+        // private double PotSize;
 
         private Stack<Pot> Pots;
 
@@ -61,10 +62,8 @@ namespace TexasHoldem.Client
                 Money = money,
                 Place = res.YourPlace
             };
-            Pots = res.Pots;
-
-            potsView1.Pots = Pots;
-            potsView1.RefreshPots();
+            if (res.Pots != null)
+                Pots = res.Pots;
 
             foreach (var player in res.PlayersInRoom)
             {
@@ -131,14 +130,8 @@ namespace TexasHoldem.Client
                 DetermineHolding(player);
             }
             DetermineWinner();
-            PlayerController.HandleGameEnding();
 
-            //for (int i = 0; i<PlayerDisplays.Length; i++)
-            //    RefreshPlayerDisplay(i);
-
-            RefreshGame().ConfigureAwait(false);
-            potsView1.RefreshPots();
-            ActionButtonsBehaviour(false);
+            HandleGameEnd();
         }
 
         private async Task RefreshGame()
@@ -190,7 +183,7 @@ namespace TexasHoldem.Client
 
         private void DetermineWinner()
         {
-            while(Pots.Count>0)
+            while (Pots.Count > 0)
             {
                 var pot = Pots.Pop();
                 var suitablePlayers = new List<Player>();
@@ -198,7 +191,7 @@ namespace TexasHoldem.Client
                 {
                     if (!player.IsPlaying)
                         continue;
-                    if(player.Holding==null)
+                    if (player.Holding == null)
                         DetermineHolding(player);
                     suitablePlayers.Add(player);
                 }
@@ -237,7 +230,6 @@ namespace TexasHoldem.Client
                         break;
                 }
             }
-            
         }
 
         private void GameInfoHandler(GameInfoServer msg)            //BAD
@@ -247,13 +239,15 @@ namespace TexasHoldem.Client
             CurrentBet = msg.BBBet;
             RaiseJump = CurrentBet;
 
-            Pots.Peek().Size = BBBet + BBBet / 2;
+            var pot = new Pot
+            {
+                Size = BBBet + BBBet / 2,
+                Players = PlayerController.Players.Values.ToList()
+            };
+            Pots.Push(pot);
 
             int BBPlace = PlayerController.BBlind.Value;
             int SBPlace = PlayerController.SBlind.Value;
-
-            Pots.Push(new Pot());
-            Pots.Peek().Players = PlayerController.Players.Values.ToList();     //redo
 
             InvokeUI(() =>
             {
@@ -264,9 +258,9 @@ namespace TexasHoldem.Client
                 PlayerDisplays[SBPlace].MoneyLabel.Text = PlayerController.Players[SBPlace].Money.ToString();
 
                 RaiseAmountUD.Minimum = (decimal)CurrentBet * 2;
-                RaiseAmountUD.Maximum = (decimal)CurrentPlayer.Money;
+                RaiseAmountUD.Maximum = (decimal)(CurrentPlayer.Money + CurrentPlayer.CurrentBet);
 
-                potsView1.RefreshPots();
+                potsView.RefreshPots();
             });
 
             InvokeUI(() => PlayerDisplays[PlayerController.PlayerToAct.Value].SetupPlayerAfkAwaiting());
@@ -387,11 +381,7 @@ namespace TexasHoldem.Client
 
         private void HandleCurrentPlayerAction(PlayerAction action, double raiseAmount = 0)
         {
-            if (PlayerController.Players[CurrentPlayer.Place].Money == 0)
-            {
-                ActionButtonsBehaviour(false);
-                return;
-            }
+            ActionButtonsBehaviour(false);
 
             _client.SendPlayerAction(action, raiseAmount);
 
@@ -432,7 +422,7 @@ namespace TexasHoldem.Client
                 RaiseAmountUD.Minimum = (decimal)BBBet;
                 RaiseAmountUD.Maximum = (decimal)CurrentPlayer.Money;
 
-                potsView1.RefreshPots();
+                potsView.RefreshPots();
 
                 for (int i = 0; i < PlayerDisplays.Length; i++)
                 {
@@ -500,6 +490,9 @@ namespace TexasHoldem.Client
             PlayerDisplays[6] = playerDisplay7;
             PlayerDisplays[7] = playerDisplay8;
 
+            potsView.Pots = Pots;
+            potsView.RefreshPots();
+
             int maxValue = 1000 / TIMER_INTERVAL * PLAYER_AFK_DELAY;
 
             foreach (var display in PlayerDisplays)
@@ -552,75 +545,24 @@ namespace TexasHoldem.Client
                 CurrentBet = raiseAmount;
             }
 
-            bool overBet = PlayerController.HandleAction(action, CurrentBet);
+            PlayerController.HandleAction(action, CurrentBet);
 
-            Pots.Peek().Size+= PlayerController.GetMoneyToPot(place);
-
-            //if(overBet)
-            //{
-            //    //Pots.Push(new Pot());
-            //    var pot = new Pot();
-            //    foreach(var player in PlayerController.Players.Values)
-            //    {
-            //        if(player.IsPlaying && player.Place != place)
-            //        {
-            //            pot.Players.Add(player);
-            //        }
-            //    }
-            //}
+            Pots.Peek().Size += PlayerController.GetMoneyToPot(place);
 
             if (PlayerController.HasOrbitEnded())
             {
-                var currPot = Pots.Peek();
-
-                var players = PlayerController.GetPlayingPlayers().OrderBy(i => i.CurrentBet).ToList();
-                var player = players[0];
-
-                int playersAmount = players.Count();
-                int sameBetIndexStart = 0;
-                for (int i = 1; i < playersAmount; i++)
-                {
-                    if (player.CurrentBet != players[i].CurrentBet && player.CurrentBet != 0)
-                    {
-                        var pot = new Pot();
-
-                        foreach (var temp in players)
-                        {
-                            if (temp.CurrentBet != 0)
-                            {
-                                pot.Players.Add(temp);
-                                temp.CurrentBet -= player.CurrentBet;
-                            }
-                        }
-
-                        pot.Size = player.CurrentBet * pot.Players.Count();
-
-                        currPot.Size -= pot.Size;
-
-                        Pots.Push(pot);
-
-                        sameBetIndexStart = i;
-                        player = players[i];
-                    }
-                }
-
-                if (sameBetIndexStart == playersAmount - 1)
-                {
-                    players[sameBetIndexStart].Money += CurrentBet;
-                }
-                else
-                {
-                    var pot = new Pot();
-                    int playersInPot = playersAmount - sameBetIndexStart;
-                    pot.Players.AddRange(players.GetRange(sameBetIndexStart, playersInPot));
-                    pot.Size = players[sameBetIndexStart].CurrentBet * playersInPot;
-
-                    currPot.Size -= pot.Size;
-
-                    Pots.Push(pot);
-                }
-
+                HandlePots();
+                PlayerController.HandleOrbitChange();
                 GameStateChanged();
+
+                if (PlayerController.IsAllIn())
+                {
+                    ActivePlayers = PlayerController.GetPlayingPlayersAmount();
+                    foreach (var player in PlayerController.Players.Values)
+                        RefreshPlayerDisplay(player.Place, actionStr);
+                    potsView.RefreshPots();
+                    return;
+                }
             }
 
             if (PlayerController.HasGameEnded())
@@ -629,20 +571,14 @@ namespace TexasHoldem.Client
                 if (winnerPlace == -1)
                     throw new Exception("No active players");
                 double sum = 0;
-                while(Pots.Count>0)
+                while (Pots.Count > 0)
                 {
                     var pot = Pots.Pop();
                     sum += pot.Size;
                 }
 
                 RefreshPlayerDisplay(winnerPlace, "Won " + sum);
-
-                Pots.Clear();
-
-                PlayerController.HandleGameEnding();
-                RefreshGame().ConfigureAwait(false);
-                potsView1.RefreshPots();
-                ActionButtonsBehaviour(false);
+                HandleGameEnd();
             }
             else
             {
@@ -652,28 +588,92 @@ namespace TexasHoldem.Client
                 {
                     PlayerDisplays[PlayerController.PlayerToAct.Value].SetupPlayerAfkAwaiting();
                     AfkTimer.Start();
-                    //if (AfkTimer == null)
-                    //{
-                    //    AfkTimer = new Timer();
-                    //    AfkTimer.Enabled = true;
-                    //    AfkTimer.Start();
-                    //    AfkTimer.Interval = TIMER_INTERVAL;
-                    //    AfkTimer.Tick += new EventHandler(AfkTimer_Tick);
-                    //}
-                    //else
-                    //{
-                    //    AfkTimer.Start();
-                    //}
                 }
 
-                RefreshPlayerDisplay(place, actionStr);
-                potsView1.RefreshPots();
+                foreach(var player in PlayerController.Players.Values)
+                    RefreshPlayerDisplay(player.Place, actionStr);
+                potsView.RefreshPots();
 
                 if (PlayerController.IsCurrentPlayerTurn(CurrentPlayer.Place))
                 {
                     ActionButtonsBehaviour(true);
-                    HandleRaizeSizeGui(overBet);
+                    HandleRaizeSizeGui(CurrentPlayer.Money < CurrentBet);
                 }
+            }
+        }
+
+        private void HandleGameEnd()
+        {
+            if (CurrentPlayer.Money == 0)
+            {
+                var messageBox = new FlatMessageBox("Insufficient funds", "You cannot play the game without money, try adding it via dd money option");
+                messageBox.ShowDialog();
+                this.Close();
+            }
+            PlayerController.HandleGameEnding();
+            RefreshGame().ConfigureAwait(false);
+            potsView.RefreshPots();
+            ActionButtonsBehaviour(false);
+        }
+
+        private void HandlePots()
+        {
+            var currPot = Pots.Peek();
+
+            var players = PlayerController.GetPlayingPlayers().OrderBy(i => i.CurrentBet).ToList();
+            if (players.Count() == 0)
+                return;
+            var player = players[0];
+
+            int playersAmount = players.Count();
+            int sameBetIndexStart = 0;
+            for (int i = 1; i < playersAmount; i++)
+            {
+                if (player.CurrentBet != players[i].CurrentBet && player.CurrentBet != 0)
+                {
+                    var pot = new Pot();
+                    double prevBet = player.CurrentBet;
+                    foreach (var temp in players)
+                    {
+                        if (temp.CurrentBet != 0)
+                        {
+                            pot.Players.Add(temp);
+                            temp.CurrentBet -= prevBet;
+                        }
+                    }
+
+                    pot.Size = prevBet * pot.Players.Count();
+
+                    if (pot.Equals(currPot))
+                    {
+                        currPot.Size -= currPot.Size - pot.Size;
+                    }
+                    else
+                    {
+                        currPot.Size -= pot.Size;
+
+                        Pots.Push(pot);
+                    }
+
+                    sameBetIndexStart = i;
+                    player = players[i];
+                }
+            }
+
+            if (sameBetIndexStart == playersAmount - 1)
+            {
+                players[sameBetIndexStart].Money += players[sameBetIndexStart].CurrentBet;
+            }
+            else
+            {
+                var pot = new Pot();
+                int playersInPot = playersAmount - sameBetIndexStart;
+                pot.Players.AddRange(players.GetRange(sameBetIndexStart, playersInPot));
+                pot.Size = players[sameBetIndexStart].CurrentBet * playersInPot;
+
+                currPot.Size -= pot.Size;
+
+                Pots.Push(pot);
             }
         }
 
@@ -697,7 +697,10 @@ namespace TexasHoldem.Client
                     if (raise > CurrentPlayer.Money)
                         InvokeUI(() => RaiseAmountUD.Minimum = (decimal)(CurrentPlayer.Money));
                     else
-                        InvokeUI(() => RaiseAmountUD.Minimum = (decimal)(raise));
+                        InvokeUI(() => {
+                            RaiseAmountUD.Minimum = (decimal)(raise);
+                            RaiseAmountUD.Maximum = (decimal)(CurrentPlayer.Money + CurrentPlayer.CurrentBet);
+                        });
                 }
             }
         }

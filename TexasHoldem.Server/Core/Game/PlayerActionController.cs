@@ -33,6 +33,12 @@ namespace TexasHoldem.Server.Core.Game
             Players = new Dictionary<int, PlayerData>();
         }
 
+        public void SkipGameState()
+        {
+            if (GameState != GameState.Showdown)
+                GameState++;
+        }
+
         public void SetupGame(double BBBet)
         {
             foreach(var player in Players.Values)
@@ -86,15 +92,13 @@ namespace TexasHoldem.Server.Core.Game
 
             if (PlayerToHandle.Money == 0)
             {
-                PlayerToHandle.PreviousBet = 0;
-                PlayerToHandle.CurrentBet = 0;
+                //PlayerToHandle.PreviousBet = 0;
+                //PlayerToHandle.CurrentBet = 0;
                 return true;
             }
-
             if (bet > PlayerToHandle.Money)
             {
                 bet = PlayerToHandle.CurrentBet + PlayerToHandle.Money;
-                //overBet = true;
             }
 
             PlayerToHandle.PreviousBet = PlayerToHandle.CurrentBet;
@@ -105,10 +109,13 @@ namespace TexasHoldem.Server.Core.Game
             if (action == PlayerAction.Fold)
             {
                 PlayerToHandle.IsPlaying = false;
-                return true;
             }
-
-            if (action == PlayerAction.Call || action == PlayerAction.Check)
+            else if (action == PlayerAction.FoldByDisconnect)
+            {
+                PlayerToHandle.IsPlaying = false;
+                PlayerToHandle.IsDisconnected = true;
+            }
+            else if (action == PlayerAction.Call)
             {
                 PlayerToHandle.Money -= moneyToSubstract;
             }
@@ -117,11 +124,9 @@ namespace TexasHoldem.Server.Core.Game
                 PlayerToHandle.Money -= moneyToSubstract;
                 orbitEnd = GetPreviuosPlayingPlace(PlayerToAct).Value;
             }
-            else if (action == PlayerAction.FoldByDisconnect)
+            else if (action == PlayerAction.Check)
             {
-                PlayerToHandle.IsPlaying = false;
-                PlayerToHandle.IsDisconnected = true;
-                return true;
+                //Players[PlayerToAct.Value].PreviousBet = 0;
             }
 
             return true;
@@ -156,23 +161,26 @@ namespace TexasHoldem.Server.Core.Game
             while (toret != from);
             return toret;
         }
+        public void HandleOrbitEnd()
+        {
+            PlayerToAct = GetNextPlayingPlace(Button);
+            orbitEnd = Button.Value;
+            GameState++;
+
+            foreach (var player in Players.Values)
+            {
+                if (!player.IsPlaying)
+                    continue;
+                player.PreviousBet = 0;
+                player.CurrentBet = 0;
+            }
+        }
 
         public bool HasOrbitEnded()
         {
             if (PlayerToAct.Value == orbitEnd)
             {
-                PlayerToAct = GetNextPlayingPlace(Button);
-                orbitEnd = Button.Value;
-                GameState++;
-
-                foreach (var player in Players.Values)
-                {
-                    if (!player.IsPlaying)
-                        continue;
-                    player.PreviousBet = 0;
-                    player.CurrentBet = 0;
-                }
-
+                
                 return true;
             }
             else
@@ -196,15 +204,23 @@ namespace TexasHoldem.Server.Core.Game
             else
             {
                 int nonFolders = 0;
+                int haveMoney = 0;
                 foreach (var player in Players.Values)
                 {
                     if (player.IsPlaying)
                     {
                         nonFolders++;
                     }
-                    if (nonFolders >= 2)
-                        return GameEndType.None;
+                    if(player.Money>0)
+                    {
+                        haveMoney++;
+                    }
+                    
                 }
+                if (haveMoney == 1)
+                    return GameEndType.AllIn;
+                if (nonFolders >= 2)
+                    return GameEndType.None;
             }
             return GameEndType.WinByFold;
         }

@@ -9,6 +9,7 @@ namespace TexasHoldem.Server.Enums
     {
         None,
         Showdown,
-        WinByFold
+        WinByFold,
+        AllIn
     }
 }

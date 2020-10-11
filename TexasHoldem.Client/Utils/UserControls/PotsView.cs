@@ -14,6 +14,7 @@ namespace TexasHoldem.Client.Utils.UserControls
         public Stack<Pot>Pots { get; set; }
         public PotsView()
         {
+            Pots = new Stack<Pot>();
             InitializeComponent();
         }
 

@@ -34,21 +34,19 @@ namespace TexasHoldem.Client.Core.Game
             return PlayerToAct.Value == currPlayerPlace;
         }
 
-        public bool HandleAction(PlayerAction action, double bet) //bug with all in
+        public void HandleAction(PlayerAction action, double bet) 
         {
-            Player PlayerToHandle = Players[PlayerToAct.Value];
-            bool overBet = false;
+            Player PlayerToHandle = GetCurrentPlayer();
             if (PlayerToHandle.Money == 0)
             {
-                PlayerToHandle.PreviousBet = 0;
-                PlayerToHandle.CurrentBet = 0;
-                return overBet;
+                //PlayerToHandle.PreviousBet = 0;
+                //PlayerToHandle.CurrentBet = 0;
+                return;
             }
 
             if (bet > PlayerToHandle.Money)
             {
                 bet = PlayerToHandle.CurrentBet + PlayerToHandle.Money;
-                overBet = true;
             }
 
             PlayerToHandle.PreviousBet = PlayerToHandle.CurrentBet;
@@ -78,7 +76,7 @@ namespace TexasHoldem.Client.Core.Game
             {
                 //Players[PlayerToAct.Value].PreviousBet = 0;
             }
-            return overBet;
+            return;
         }
 
         private Place GetNextPlayingPlace(Place from)
@@ -111,22 +109,27 @@ namespace TexasHoldem.Client.Core.Game
             return toret;
         }
 
+        public void HandleOrbitChange()
+        {
+            PlayerToAct = GetNextPlayingPlace(Button);
+            orbitEnd = Button.Value;
+            GameState++;
+
+            foreach (var player in Players.Values)
+            {
+                if (!player.IsPlaying)
+                    continue;
+                player.PreviousBet = 0;
+                player.CurrentBet = 0;
+            }
+        }
+
+
+
         public bool HasOrbitEnded()
         {
             if (PlayerToAct.Value == orbitEnd)
             {
-                PlayerToAct = GetNextPlayingPlace(Button);
-                orbitEnd = Button.Value;
-                GameState++;
-
-                foreach(var player in Players.Values)
-                {
-                    if (!player.IsPlaying)
-                        continue;
-                    player.PreviousBet = 0;
-                    player.CurrentBet = 0;
-                }
-
                 return true;
             }
             else
@@ -140,7 +143,10 @@ namespace TexasHoldem.Client.Core.Game
         {
             return Players[playerPos].CurrentBet - Players[playerPos].PreviousBet;
         }
-
+        public Player GetCurrentPlayer()
+        {
+            return Players[PlayerToAct.Value];
+        }
         public void HandleGameEnding()
         {
             Button = Button.GetNext();
@@ -166,7 +172,7 @@ namespace TexasHoldem.Client.Core.Game
             Players[SBlind.Value].CurrentBet = BBBet/2;
         }
 
-        public int GetPlayingPlayersAmount()
+        public int GetPlayingPlayersAmount() //fix below
         {
             int amount = 0;
             foreach (var player in Players.Values)
@@ -201,6 +207,19 @@ namespace TexasHoldem.Client.Core.Game
                     return player.Place;
             }
             return -1;
+        }
+
+        public bool IsAllIn()
+        {
+            int haveMoney = 0;
+            foreach (var player in Players.Values)
+            {
+                if (player.Money > 0)
+                {
+                    haveMoney++;
+                }
+            }
+            return haveMoney == 1;
         }
     }
 }

@@ -478,6 +478,14 @@ namespace TexasHoldem.Server.Core.Network
                     var endType = Game.HasGameEnded();
                     if (endType != GameEndType.None)
                     {
+                        if(endType == GameEndType.AllIn)
+                        {
+                            endType = GameEndType.Showdown;
+                            var cards = Game.ForceGameEnd();
+                            if(cards!= null && cards.Count()>0)
+                                SendCards(cards);
+                        }
+
                         Game.HandleGameEnd(endType);
                         var allPlayers = Game.GetAllPlayers();
 
@@ -511,15 +519,7 @@ namespace TexasHoldem.Server.Core.Network
                     }
                     else
                     {
-                        var Cards = Game.GetPendingCards();
-
-                        var cardMsg = new CardInfoServer
-                        {
-                            Cards = Cards,
-                            ToHand = false
-                        };
-                        Server.SendMessageToAll(cardMsg, Game);
-                        Console.WriteLine("Sent cards to board");
+                        SendCards(Game.GetPendingCards());
                     }
                 }
 
@@ -527,6 +527,17 @@ namespace TexasHoldem.Server.Core.Network
             }
             else
                 Console.WriteLine("Action failed");
+        }
+
+        private void SendCards(List<Card> cards)
+        {
+            var cardMsg = new CardInfoServer
+            {
+                Cards = cards,
+                ToHand = false
+            };
+            Server.SendMessageToAll(cardMsg, Game);
+            Console.WriteLine("Sent cards to board");
         }
 
         private async Task StartNewGameWithDelay(int delay = 3000)

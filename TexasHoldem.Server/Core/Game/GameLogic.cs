@@ -267,7 +267,7 @@ namespace TexasHoldem.Server
                 RaiseJump = raiseAmount - CurrentBet;
                 CurrentBet = raiseAmount;
             }
-            if (PlayerController.HandleAction(id, action, raiseAmount))
+            if (PlayerController.HandleAction(id, action, CurrentBet))
             {
                 Pots.Peek().Size += PlayerController.GetMoneyToPot(PlayerController.PlayerToAct.Value);
                 return true;
@@ -278,7 +278,6 @@ namespace TexasHoldem.Server
 
         public List<Card> GetPendingCards()
         {
-            CurrentBet = 0;
             return DealCardsToBoard(PlayerController.GameState);
         }
 
@@ -295,9 +294,12 @@ namespace TexasHoldem.Server
             PlayerController.SetupGame(BBlindBet);
 
             CurrentBet = BBlindBet;
-            var pot = new Pot();
-            pot.Size= BBlindBet + BBlindBet / 2;
-            pot.Players = PlayerController.Players.Values.OfType<Player>().ToList();
+            var pot = new Pot
+            {
+                Size = BBlindBet + BBlindBet / 2,
+                Players = PlayerController.Players.Values.OfType<Player>().ToList()
+            };
+            Pots.Push(pot);
         }
 
         private void RefreshCards()
@@ -328,6 +330,8 @@ namespace TexasHoldem.Server
             var currPot = Pots.Peek();
 
             var players = PlayerController.GetPlayingPlayers().OrderBy(i => i.CurrentBet).ToList();
+            if (players.Count() == 0)
+                return;
             var player = players[0];
 
             int playersAmount = players.Count();
@@ -337,21 +341,28 @@ namespace TexasHoldem.Server
                 if (player.CurrentBet != players[i].CurrentBet && player.CurrentBet != 0)
                 {
                     var pot = new Pot();
-
+                    double prevBet = player.CurrentBet;
                     foreach (var temp in players)
                     {
                         if (temp.CurrentBet != 0)
                         {
                             pot.Players.Add(temp);
-                            temp.CurrentBet -= player.CurrentBet;
+                            temp.CurrentBet -= prevBet;
                         }
                     }
 
-                    pot.Size = player.CurrentBet * pot.Players.Count();
+                    pot.Size = prevBet * pot.Players.Count();
 
-                    currPot.Size -= pot.Size;
+                    if (pot.Equals(currPot))
+                    {
+                        currPot.Size -= currPot.Size - pot.Size;
+                    }
+                    else
+                    {
+                        currPot.Size -= pot.Size;
 
-                    Pots.Push(pot);
+                        Pots.Push(pot);
+                    }
 
                     sameBetIndexStart = i;
                     player = players[i];
@@ -360,7 +371,7 @@ namespace TexasHoldem.Server
 
             if (sameBetIndexStart == playersAmount - 1)
             {
-                players[sameBetIndexStart].Money += CurrentBet;
+                players[sameBetIndexStart].Money += players[sameBetIndexStart].CurrentBet;
             }
             else
             {
@@ -373,6 +384,9 @@ namespace TexasHoldem.Server
 
                 Pots.Push(pot);
             }
+
+            PlayerController.HandleOrbitEnd();
+            CurrentBet = 0;
         }
 
         public List<PlayerBase> GetPlayers() //??????????????????? does not work otherwise, cast from linq
@@ -417,6 +431,17 @@ namespace TexasHoldem.Server
             AfkTimer.Stop();
             Console.WriteLine("fold by time");
             PlayerController.Players[PlayerController.PlayerToAct.Value].ClientReceiver.CurrentPlayerFoldByTime();
+        }
+
+        public List<Card> ForceGameEnd()
+        {
+            var cards = new List<Card>();
+            while(PlayerController.GameState !=GameState.Showdown)
+            {
+                cards.AddRange(GetPendingCards());
+                PlayerController.SkipGameState();
+            }
+            return cards;
         }
 
         public int GetCurrentPlayerPlace()

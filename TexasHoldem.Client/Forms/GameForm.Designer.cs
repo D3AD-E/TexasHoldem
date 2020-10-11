@@ -46,11 +46,11 @@
             this.playerDisplay6 = new TexasHoldem.Client.PlayerDisplay();
             this.playerDisplay7 = new TexasHoldem.Client.PlayerDisplay();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.potsView1 = new TexasHoldem.Client.Utils.UserControls.PotsView();
             this.FoldFButton = new TexasHoldem.Client.Utils.UserControls.FlatButton();
             this.CallFButton = new TexasHoldem.Client.Utils.UserControls.FlatButton();
             this.RaiseFButton = new TexasHoldem.Client.Utils.UserControls.FlatButton();
             this.topBorder1 = new TexasHoldem.Client.Utils.UserControls.TopBorder();
+            this.potsView = new TexasHoldem.Client.Utils.UserControls.PotsView();
             ((System.ComponentModel.ISupportInitialize)(this.RaiseAmountUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.BoardCard1Img)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.BoardCard2Img)).BeginInit();
@@ -234,7 +234,6 @@
             // 
             this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(247)))), ((int)(((byte)(255)))));
             this.panel1.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("panel1.BackgroundImage")));
-            this.panel1.Controls.Add(this.potsView1);
             this.panel1.Controls.Add(this.FoldFButton);
             this.panel1.Controls.Add(this.CallFButton);
             this.panel1.Controls.Add(this.RaiseFButton);
@@ -254,21 +253,11 @@
             this.panel1.Controls.Add(this.BoardCard1Img);
             this.panel1.Controls.Add(this.RaiseAmountUD);
             this.panel1.Controls.Add(this.UsernameLabel);
+            this.panel1.Controls.Add(this.potsView);
             this.panel1.Location = new System.Drawing.Point(32, 32);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(840, 606);
             this.panel1.TabIndex = 14;
-            // 
-            // potsView1
-            // 
-            this.potsView1.BackColor = System.Drawing.Color.Transparent;
-            this.potsView1.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.potsView1.Location = new System.Drawing.Point(362, 270);
-            this.potsView1.Margin = new System.Windows.Forms.Padding(4);
-            this.potsView1.Name = "potsView1";
-            this.potsView1.Pots = null;
-            this.potsView1.Size = new System.Drawing.Size(108, 135);
-            this.potsView1.TabIndex = 15;
             // 
             // FoldFButton
             // 
@@ -322,6 +311,15 @@
             this.topBorder1.Size = new System.Drawing.Size(904, 31);
             this.topBorder1.TabIndex = 15;
             // 
+            // potsView
+            // 
+            this.potsView.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.potsView.Location = new System.Drawing.Point(298, 270);
+            this.potsView.Margin = new System.Windows.Forms.Padding(4);
+            this.potsView.Name = "potsView";
+            this.potsView.Size = new System.Drawing.Size(253, 127);
+            this.potsView.TabIndex = 15;
+            // 
             // GameForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
@@ -372,7 +370,7 @@
         private Utils.UserControls.FlatButton CallFButton;
         private Utils.UserControls.FlatButton RaiseFButton;
         private Utils.UserControls.TopBorder topBorder1;
-        private Utils.UserControls.PotsView potsView1;
+        private Utils.UserControls.PotsView potsView;
     }
 }
 
