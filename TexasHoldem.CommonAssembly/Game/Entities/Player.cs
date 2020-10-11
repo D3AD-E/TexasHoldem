@@ -28,12 +28,13 @@ namespace TexasHoldemCommonAssembly.Game.Entities
             this.IsPlaying = true;
         }
 
-        public Player(PlayerBase player) : this()
+        public Player(PlayerBase player, bool isPlaying = true) : this()
         {
             this.Money = player.Money;
             this.Username = player.Username;
             this.Place = player.Place;
             this.Hand = new Card[2];
+            this.IsPlaying = isPlaying;
         }
     }
 }

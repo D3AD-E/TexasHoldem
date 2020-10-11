@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -40,30 +41,30 @@ namespace TexasHoldem.Client.Forms
 
         private void JoinRoom(int index)
         {
-            Guid roomId = _rooms[index].Id;
-
-            _client.RequestJoinRoom(roomId, (senderClient, res) =>
+            if(CheckMoneyAmount())
             {
-                if (res.HasError)
+                Guid roomId = _rooms[index].Id;
+
+                _client.RequestJoinRoom(roomId, (senderClient, res) =>
                 {
-                    ExeptionHandler.HandleExeption(res.Exception);
-                }
-                else
-                {
-                    //Application.Run(new GameForm(_username, _money, res));
-                    Thread mThread = new Thread(delegate ()
+                    if (res.HasError)
                     {
-                        var gf = new GameForm(_username, _money, res);
-                        gf.ShowDialog();
-                    });
+                        ExeptionHandler.HandleExeption(res.Exception);
+                    }
+                    else
+                    {
+                        Thread mThread = new Thread(delegate ()
+                        {
+                            var gf = new GameForm(_username, _money, res);
+                            gf.ShowDialog();
+                        });
 
-                    mThread.SetApartmentState(ApartmentState.STA);
+                        mThread.SetApartmentState(ApartmentState.STA);
 
-                    mThread.Start();
-                    //var gf = new GameForm(_username, _money, res);
-                    //gf.Show();
-                }
-            });
+                        mThread.Start();
+                    }
+                });
+            }
         }
 
         private void RoomsListView_ColumnWidthChanging(object sender, ColumnWidthChangingEventArgs e)
@@ -157,35 +158,47 @@ namespace TexasHoldem.Client.Forms
 
         private void CreateRoomFButton_Click(object sender, EventArgs e)
         {
-            var userInputForm = new CreateRoomForm();
-            var res = userInputForm.ShowDialog();
-            if(res == DialogResult.OK)
+            if(CheckMoneyAmount())
             {
-                string roomName = userInputForm.RoomName;
-                int maxPlayers = userInputForm.MaxPlayers;
-
-                _client.RequestCreateRoom(roomName, maxPlayers, (senderClient, res) =>
+                var userInputForm = new CreateRoomForm();
+                var res = userInputForm.ShowDialog();
+                if (res == DialogResult.OK)
                 {
-                    if (res.HasError)
-                    {
-                        ExeptionHandler.HandleExeption(res.Exception);
-                    }
-                    else
-                    {
-                        //Thread mThread = new Thread(delegate ()
-                        //{
-                        //    var gf = new GameForm(_username, _money, res);
-                        //    gf.ShowDialog();
-                        //});
+                    string roomName = userInputForm.RoomName;
+                    int maxPlayers = userInputForm.MaxPlayers;
 
-                        //mThread.SetApartmentState(ApartmentState.STA);
+                    _client.RequestCreateRoom(roomName, maxPlayers, (senderClient, res) =>
+                    {
+                        if (res.HasError)
+                        {
+                            ExeptionHandler.HandleExeption(res.Exception);
+                        }
+                        else
+                        {
+                            Thread mThread = new Thread(delegate ()
+                            {
+                                var gf = new GameForm(_username, _money, res);
+                                gf.ShowDialog();
+                            });
 
-                        //mThread.Start();
-                        var gf = new GameForm(_username, _money, res);
-                        gf.Show();
-                    }
-                });
+                            mThread.SetApartmentState(ApartmentState.STA);
+
+                            mThread.Start();
+                        }
+                    });
+                }
             }
+        }
+
+        private bool CheckMoneyAmount()
+        {
+            if(_money == 0)
+            {
+                var messageBox = new FlatMessageBox("Error", "Insufficient funds to join a room");
+                messageBox.ShowDialog();
+                return false;
+            }
+            return true;
         }
 
         private void AddMoneyFButton_Click(object sender, EventArgs e)

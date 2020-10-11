@@ -42,6 +42,8 @@ namespace TexasHoldem.Client
 
         private int ActivePlayers;
 
+        private bool IsGameInProgress;
+
         private const string PATH = @"../../Pics/cards.png";
 
         private const int TIMER_INTERVAL = 200;//in ms
@@ -234,6 +236,7 @@ namespace TexasHoldem.Client
 
         private void GameInfoHandler(GameInfoServer msg)            //BAD
         {
+            IsGameInProgress = true;
             PlayerController.Setup(msg.BBPlace, msg.ButtonPlace, msg.PlayerToAct, msg.BBBet);
             BBBet = msg.BBBet;
             CurrentBet = msg.BBBet;
@@ -281,7 +284,7 @@ namespace TexasHoldem.Client
 
         private void NewPlayerJoinedHandler(NewPlayerJoinedServer msg)
         {
-            PlayerController.Players.Add(msg.Player.Place, new Player(msg.Player));
+            PlayerController.Players.Add(msg.Player.Place, new Player(msg.Player, !IsGameInProgress));
             InvokeUI(() =>
             {
                 PlayerDisplays[msg.Player.Place].UsernameLabel.Text = msg.Player.Username;
@@ -604,6 +607,7 @@ namespace TexasHoldem.Client
 
         private void HandleGameEnd()
         {
+            IsGameInProgress = false;
             if (CurrentPlayer.Money == 0)
             {
                 var messageBox = new FlatMessageBox("Insufficient funds", "You cannot play the game without money, try adding it via dd money option");
