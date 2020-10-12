@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace TexasHoldem.Server.DAL.Models
+﻿namespace TexasHoldem.Server.DAL.Models
 {
     public class User : Entity
     {

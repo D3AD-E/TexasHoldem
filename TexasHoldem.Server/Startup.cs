@@ -2,18 +2,13 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using TexasHoldem.Server.Core.Network;
 using TexasHoldem.Server.Core.Services;
 using TexasHoldem.Server.DAL;
 
 namespace TexasHoldem.Server
 {
     public class Startup
-    { 
+    {
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<UserContext>(options =>

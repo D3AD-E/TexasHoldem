@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace TexasHoldemCommonAssembly.Network.Message
 {
@@ -10,7 +8,6 @@ namespace TexasHoldemCommonAssembly.Network.Message
         public AddMoneyResponse(AddMoneyRequest req)
             : base(req)
         {
-
         }
     }
 }

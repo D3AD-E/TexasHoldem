@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using TexasHoldem.Server.Core.Network;
+﻿using TexasHoldem.Server.Core.Network;
 
 namespace TexasHoldem.Server
 {

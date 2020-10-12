@@ -39,7 +39,6 @@
             this.LogOutFButton = new TexasHoldem.Client.Utils.UserControls.FlatButton();
             this.JoinRoomFButton = new TexasHoldem.Client.Utils.UserControls.FlatButton();
             this.CreateRoomFButton = new TexasHoldem.Client.Utils.UserControls.FlatButton();
-            this.SettingsFButton = new TexasHoldem.Client.Utils.UserControls.FlatButton();
             this.AddMoneyFButton = new TexasHoldem.Client.Utils.UserControls.FlatButton();
             this.panel1 = new System.Windows.Forms.Panel();
             this.RefreshFButton = new TexasHoldem.Client.Utils.UserControls.FlatButton();
@@ -153,20 +152,6 @@
             this.CreateRoomFButton.UseVisualStyleBackColor = true;
             this.CreateRoomFButton.Click += new System.EventHandler(this.CreateRoomFButton_Click);
             // 
-            // SettingsFButton
-            // 
-            this.SettingsFButton.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(244)))), ((int)(((byte)(96)))), ((int)(((byte)(54)))));
-            this.SettingsFButton.FlatAppearance.BorderSize = 0;
-            this.SettingsFButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(247)))), ((int)(((byte)(255)))));
-            this.SettingsFButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.SettingsFButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.SettingsFButton.Location = new System.Drawing.Point(554, 214);
-            this.SettingsFButton.Name = "SettingsFButton";
-            this.SettingsFButton.Size = new System.Drawing.Size(120, 40);
-            this.SettingsFButton.TabIndex = 4;
-            this.SettingsFButton.Text = "Settings";
-            this.SettingsFButton.UseVisualStyleBackColor = true;
-            // 
             // AddMoneyFButton
             // 
             this.AddMoneyFButton.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(244)))), ((int)(((byte)(96)))), ((int)(((byte)(54)))));
@@ -174,7 +159,7 @@
             this.AddMoneyFButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(247)))), ((int)(((byte)(255)))));
             this.AddMoneyFButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.AddMoneyFButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.AddMoneyFButton.Location = new System.Drawing.Point(554, 168);
+            this.AddMoneyFButton.Location = new System.Drawing.Point(554, 214);
             this.AddMoneyFButton.Name = "AddMoneyFButton";
             this.AddMoneyFButton.Size = new System.Drawing.Size(120, 40);
             this.AddMoneyFButton.TabIndex = 4;
@@ -187,7 +172,6 @@
             this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(247)))), ((int)(((byte)(255)))));
             this.panel1.Controls.Add(this.RefreshFButton);
             this.panel1.Controls.Add(this.AddMoneyFButton);
-            this.panel1.Controls.Add(this.SettingsFButton);
             this.panel1.Controls.Add(this.CreateRoomFButton);
             this.panel1.Controls.Add(this.JoinRoomFButton);
             this.panel1.Controls.Add(this.LogOutFButton);
@@ -206,7 +190,7 @@
             this.RefreshFButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(247)))), ((int)(((byte)(255)))));
             this.RefreshFButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.RefreshFButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.RefreshFButton.Location = new System.Drawing.Point(554, 122);
+            this.RefreshFButton.Location = new System.Drawing.Point(554, 168);
             this.RefreshFButton.Name = "RefreshFButton";
             this.RefreshFButton.Size = new System.Drawing.Size(120, 40);
             this.RefreshFButton.TabIndex = 4;
@@ -236,6 +220,7 @@
             this.MaximizeBox = false;
             this.Name = "RoomsBrowserForm";
             this.Text = "RoomsBrowser";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.RoomsBrowserForm_FormClosed);
             this.Load += new System.EventHandler(this.RoomsBrowserForm_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
@@ -253,7 +238,6 @@
         private System.Windows.Forms.Label AvailableMoneyLabel;
         private Utils.UserControls.FlatButton LogOutFButton;
         private Utils.UserControls.FlatButton CreateRoomFButton;
-        private Utils.UserControls.FlatButton SettingsFButton;
         private Utils.UserControls.FlatButton AddMoneyFButton;
         private Utils.UserControls.FlatButton JoinRoomFButton;
         private System.Windows.Forms.Panel panel1;

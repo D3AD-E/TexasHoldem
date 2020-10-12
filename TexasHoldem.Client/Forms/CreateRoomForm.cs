@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 
 namespace TexasHoldem.Client.Forms
@@ -13,6 +8,7 @@ namespace TexasHoldem.Client.Forms
         public string RoomName { get; private set; }
 
         public int MaxPlayers { get; private set; }
+
         public CreateRoomForm()
         {
             InitializeComponent();

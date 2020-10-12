@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
+using TexasHoldem.CommonAssembly.Network.Message;
 using TexasHoldemCommonAssembly.Enums;
 using TexasHoldemCommonAssembly.Network.Message;
 
@@ -30,7 +28,7 @@ namespace TexasHoldem.Client.Core.Network
 
         public event Delegates.MessageReceivedDelegate MessageReceived;
 
-        static Client _instance;
+        private static Client _instance;
 
         public static Client Instance
         {
@@ -109,6 +107,7 @@ namespace TexasHoldem.Client.Core.Network
                 Thread.Sleep(30);
             }
         }
+
         protected virtual void OnMessageReceived(MessageBase msg)
         {
             Type type = msg.GetType();
@@ -125,6 +124,7 @@ namespace TexasHoldem.Client.Core.Network
                 }
             }
         }
+
         public void DisconnectFromRoom()
         {
             try
@@ -133,6 +133,7 @@ namespace TexasHoldem.Client.Core.Network
             }
             catch { }
         }
+
         public void Disconnect()
         {
             MessageQueue.Clear();
@@ -149,6 +150,7 @@ namespace TexasHoldem.Client.Core.Network
             TcpClient.Close();
             //OnClientDisconnected();
         }
+
         private void AddCallback(Delegate callBack, MessageBase msg)
         {
             if (callBack != null)
@@ -164,6 +166,7 @@ namespace TexasHoldem.Client.Core.Network
                 CallBacks.Add(responseCallback);
             }
         }
+
         private void InvokeMessageCallback(MessageBase msg, bool deleteCallback)
         {
             var callBackObject = CallBacks.SingleOrDefault(x => x.ID == msg.CallbackID);
@@ -177,6 +180,14 @@ namespace TexasHoldem.Client.Core.Network
                 callBackObject.CallBack.DynamicInvoke(this, msg);
             }
         }
+
+        public void RequestHeartbeat(Action<Client, HeartbeatResponse> callback)
+        {
+            var request = new HeartbeatRequest();
+            AddCallback(callback, request);
+            SendMessage(request);
+        }
+
         public void RequestAddMoneyPhraseConfirm(string phrase, Action<Client, AddMoneyResponse> callback)
         {
             var request = new AddMoneyRequest
@@ -186,12 +197,14 @@ namespace TexasHoldem.Client.Core.Network
             AddCallback(callback, request);
             SendMessage(request);
         }
+
         public void RequestAddMoneyPhrase(Action<Client, AddMoneyPhraseResponse> callback)
         {
             var request = new AddMoneyPhraseRequest();
             AddCallback(callback, request);
             SendMessage(request);
         }
+
         public void RequestCreateRoom(string name, int maxPlayers, Action<Client, JoinResponse> callback)
         {
             var request = new CreateRoomRequest
@@ -202,6 +215,7 @@ namespace TexasHoldem.Client.Core.Network
             AddCallback(callback, request);
             SendMessage(request);
         }
+
         public void RequestJoinRoom(Guid roomId, Action<Client, JoinResponse> callback)
         {
             var request = new JoinRoomRequest
@@ -236,26 +250,6 @@ namespace TexasHoldem.Client.Core.Network
             {
                 Username = username,
                 Password = password
-            };
-            AddCallback(callback, request);
-            SendMessage(request);
-        }
-
-        public void RequestCard(bool toHand, Action<Client, CardInfoResponse> callback)
-        {
-            var request = new CardInfoRequest
-            {
-                ToHand = toHand
-            };
-            AddCallback(callback, request);
-            SendMessage(request);
-        }
-
-        public void RequestJoin(string username, Action<Client, JoinResponse> callback)
-        {
-            var request = new JoinRequest
-            {
-                Username = username
             };
             AddCallback(callback, request);
             SendMessage(request);

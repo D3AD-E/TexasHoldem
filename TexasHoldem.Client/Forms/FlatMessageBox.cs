@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 
 namespace TexasHoldem.Client.Forms
@@ -14,7 +10,7 @@ namespace TexasHoldem.Client.Forms
         {
             InitializeComponent();
 
-            BottomLabel.MaximumSize = new Size(panel1.Width-30, 0);
+            BottomLabel.MaximumSize = new Size(panel1.Width - 30, 0);
             BottomLabel.AutoSize = true;
 
             TopLabel.Text = topText;
@@ -22,11 +18,11 @@ namespace TexasHoldem.Client.Forms
 
             //if(panel1.Width + panel1.Location.X < TopLabel.Size.Width + TopLabel.Location.X)
             {
-                TopLabel.Left = panel1.Location.X + (panel1.Width-TopLabel.Size.Width) / 2;
+                TopLabel.Left = panel1.Location.X + (panel1.Width - TopLabel.Size.Width) / 2;
             }
         }
 
-        public FlatMessageBox(string toptextText, string bottomText, Color topColor , Color botColor) :this(toptextText, bottomText)
+        public FlatMessageBox(string toptextText, string bottomText, Color topColor, Color botColor) : this(toptextText, bottomText)
         {
             TopLabel.ForeColor = topColor;
             BottomLabel.ForeColor = botColor;

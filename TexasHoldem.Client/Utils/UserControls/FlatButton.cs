@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 
 namespace TexasHoldem.Client.Utils.UserControls
@@ -9,13 +7,15 @@ namespace TexasHoldem.Client.Utils.UserControls
     public class FlatButton : Button
     {
         private Color ForeColorPrev;
-        public FlatButton():base()
+
+        public FlatButton() : base()
         {
             FlatStyle = FlatStyle.Flat;
             this.FlatAppearance.BorderSize = 0;
 
             FlatAppearance.MouseOverBackColor = BackColor;
-            BackColorChanged += (s, e) => {
+            BackColorChanged += (s, e) =>
+            {
                 FlatAppearance.MouseOverBackColor = BackColor;
             };
 
@@ -36,7 +36,5 @@ namespace TexasHoldem.Client.Utils.UserControls
             this.FlatAppearance.BorderSize = 0;
             this.ForeColor = ForeColorPrev;
         }
-
-
     }
 }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace TexasHoldem.Client.Core.Network
+﻿namespace TexasHoldem.Client.Core.Network
 {
     public class Delegates
     {

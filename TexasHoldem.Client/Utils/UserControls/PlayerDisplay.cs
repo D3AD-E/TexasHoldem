@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
-using System.Text;
 using System.Windows.Forms;
 
 namespace TexasHoldem.Client
@@ -28,15 +23,17 @@ namespace TexasHoldem.Client
             MoneyLabel.Text = string.Empty;
             ActionLabel.Text = string.Empty;
         }
+
         public void SetupAfkBar(int maxValue)
         {
             AfkProgressBar.Maximum = maxValue;
             AfkProgressBar.Value = 0;
         }
+
         public bool IncreasePlayerAfk(int by)
         {
             InvokeUI(() => AfkProgressBar.Value += by);
-            
+
             if (AfkProgressBar.Value == AfkProgressBar.Maximum)
             {
                 return true;
@@ -44,6 +41,7 @@ namespace TexasHoldem.Client
             else
                 return false;
         }
+
         public void RefreshPlayerAfk()
         {
             InvokeUI(() =>
@@ -53,6 +51,7 @@ namespace TexasHoldem.Client
                 ActionLabel.Show();
             });
         }
+
         public void SetupPlayerAfkAwaiting()
         {
             InvokeUI(() =>

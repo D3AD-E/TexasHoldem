@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Reflection.Metadata.Ecma335;
-using System.Text;
 using System.Threading;
+using System.Timers;
 using System.Windows.Forms;
-using TexasHoldem.Client.Core.Network;
 using TexasHoldem.Client.Utils;
 using TexasHoldemCommonAssembly.Game.Entities;
 
@@ -15,17 +11,27 @@ namespace TexasHoldem.Client.Forms
 {
     public partial class RoomsBrowserForm : Form
     {
-
         private string _username;
 
         private double _money;
 
         private readonly Core.Network.Client _client;
 
+        private System.Timers.Timer _timer;
+
         private List<Room> _rooms;
+
+        private bool _awaitMessage;
+
         public RoomsBrowserForm(string username, double money)
         {
             InitializeComponent();
+            _awaitMessage = false;
+            _timer = new System.Timers.Timer();
+            _timer.Interval = 30000;
+            _timer.Enabled = true;
+            _timer.Start();
+            _timer.Elapsed += _timer_Elapsed;
 
             _rooms = new List<Room>();
             _username = username;
@@ -39,9 +45,22 @@ namespace TexasHoldem.Client.Forms
             colorListViewHeader(ref RoomsListView, backColor, Color.Black);
         }
 
+        private void _timer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            if (_awaitMessage)
+            {
+                ExeptionHandler.HandleExeption(new Exception("Server did not respond"), true);
+            }
+            _awaitMessage = true;
+            _client.RequestHeartbeat((senderClient, res) =>
+            {
+                _awaitMessage = false;
+            });
+        }
+
         private void JoinRoom(int index)
         {
-            if(CheckMoneyAmount())
+            if (CheckMoneyAmount())
             {
                 Guid roomId = _rooms[index].Id;
 
@@ -158,7 +177,7 @@ namespace TexasHoldem.Client.Forms
 
         private void CreateRoomFButton_Click(object sender, EventArgs e)
         {
-            if(CheckMoneyAmount())
+            if (CheckMoneyAmount())
             {
                 var userInputForm = new CreateRoomForm();
                 var res = userInputForm.ShowDialog();
@@ -192,7 +211,7 @@ namespace TexasHoldem.Client.Forms
 
         private bool CheckMoneyAmount()
         {
-            if(_money == 0)
+            if (_money == 0)
             {
                 var messageBox = new FlatMessageBox("Error", "Insufficient funds to join a room");
                 messageBox.ShowDialog();
@@ -205,7 +224,7 @@ namespace TexasHoldem.Client.Forms
         {
             var addMoneyForm = new AddMoneyForm();
             var res = addMoneyForm.ShowDialog();
-            if(res == DialogResult.OK)
+            if (res == DialogResult.OK)
             {
                 _client.RequestAddMoneyPhraseConfirm(addMoneyForm.TypedMessage, (senderClient, res) =>
                 {
@@ -218,7 +237,7 @@ namespace TexasHoldem.Client.Forms
                         _money += 1000;
                         var messagebox = new FlatMessageBox("Success", "1000 coins have been successfully added to your account", Color.Green, Color.Black);
                         messagebox.ShowDialog();
-                        InvokeUI(() => AvailableMoneyLabel.Text = $"Balance = {_money}");   
+                        InvokeUI(() => AvailableMoneyLabel.Text = $"Balance = {_money}");
                     }
                 });
             }
@@ -227,6 +246,11 @@ namespace TexasHoldem.Client.Forms
         private void RefreshFButton_Click(object sender, EventArgs e)
         {
             GetRooms();
+        }
+
+        private void RoomsBrowserForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Application.Exit();
         }
     }
 }

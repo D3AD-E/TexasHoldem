@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace TexasHoldemCommonAssembly.Game.Entities
+﻿namespace TexasHoldemCommonAssembly.Game.Entities
 {
     public class Player : PlayerBase
     {
-
         public Card[] Hand { get; set; }
 
         public Holding Holding { get; set; }

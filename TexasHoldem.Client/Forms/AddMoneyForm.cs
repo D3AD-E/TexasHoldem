@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
-using TexasHoldem.Client.Core.Network;
 using TexasHoldem.Client.Utils;
 
 namespace TexasHoldem.Client.Forms
@@ -14,6 +9,7 @@ namespace TexasHoldem.Client.Forms
     {
         private readonly Core.Network.Client _client;
         public string TypedMessage { get; private set; }
+
         public AddMoneyForm()
         {
             InitializeComponent();
@@ -33,7 +29,7 @@ namespace TexasHoldem.Client.Forms
         {
             _client.RequestAddMoneyPhrase((senderClient, res) =>
             {
-                if(res.HasError)
+                if (res.HasError)
                 {
                     ExeptionHandler.HandleExeption(res.Exception);
                 }

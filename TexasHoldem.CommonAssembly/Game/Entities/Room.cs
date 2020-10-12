@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Dynamic;
-using System.Text;
 
 namespace TexasHoldemCommonAssembly.Game.Entities
 {
@@ -14,7 +11,7 @@ namespace TexasHoldemCommonAssembly.Game.Entities
 
         public double BBBet { get; set; }
 
-        public  double SBBet { get; set; }
+        public double SBBet { get; set; }
 
         public int MaxPlayersAmount { get; set; }
 

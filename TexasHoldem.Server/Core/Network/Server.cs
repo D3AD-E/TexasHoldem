@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
+using TexasHoldem.Server.Core.Services;
 using TexasHoldemCommonAssembly.Game.Entities;
 using TexasHoldemCommonAssembly.Network.Message;
-using TexasHoldem.Server.Core.Game.Entities;
-using TexasHoldem.Server.Core.Services;
 
 namespace TexasHoldem.Server.Core.Network
 {
@@ -47,13 +46,13 @@ namespace TexasHoldem.Server.Core.Network
         public List<Room> GetRooms()
         {
             List<Room> rooms = new List<Room>();
-            foreach(var key in Games.Keys)
+            foreach (var key in Games.Keys)
             {
                 var toAdd = new Room
                 {
                     Id = key,
                     BBBet = Games[key].BBlindBet,
-                    SBBet = Games[key].BBlindBet/2,
+                    SBBet = Games[key].BBlindBet / 2,
                     Name = Games[key].Name,
                     MaxPlayersAmount = Games[key].MaxPlayerAmount,
                     CurrentPlayersAmount = Games[key].CurrentPlayerAmount
@@ -106,9 +105,9 @@ namespace TexasHoldem.Server.Core.Network
 
         public void SendMessageToAll(ServerMessageBase msg, GameLogic inGame)
         {
-            foreach(var receiver in Receivers)
+            foreach (var receiver in Receivers)
             {
-                if(receiver.Game == inGame)
+                if (receiver.Game == inGame)
                     receiver.SendMessage(msg);
             }
         }
@@ -122,6 +121,7 @@ namespace TexasHoldem.Server.Core.Network
                 receiver.SendMessage(msg);
             }
         }
+
         public void SendMessageToAllExcept(ServerMessageBase msg, Receiver notToSendTo, GameLogic inGame)
         {
             foreach (var receiver in Receivers)
@@ -131,6 +131,7 @@ namespace TexasHoldem.Server.Core.Network
                 receiver.SendMessage(msg);
             }
         }
+
         public void SendMessageToAllExcept(ServerMessageBase msg, Guid notToSendTo, GameLogic inGame)
         {
             foreach (var receiver in Receivers)

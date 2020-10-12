@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace TexasHoldemCommonAssembly.Game.Entities
+﻿namespace TexasHoldemCommonAssembly.Game.Entities
 {
     public class Place
     {
@@ -42,6 +38,7 @@ namespace TexasHoldemCommonAssembly.Game.Entities
                 val = 0;
             return new Place(val, MaxPlace);
         }
+
         public Place GetPrevious()
         {
             int val = Value;

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using TexasHoldemCommonAssembly.Enums;
 
 namespace TexasHoldemCommonAssembly.Network.Message

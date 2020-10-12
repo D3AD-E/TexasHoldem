@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
 using TexasHoldemCommonAssembly.Enums;
 
 namespace TexasHoldemCommonAssembly.Game.Entities
@@ -14,6 +12,7 @@ namespace TexasHoldemCommonAssembly.Game.Entities
         public CardProperty.Value Value { get; private set; }
 
         public bool IsDrawn { get; set; }
+
         public Card(CardProperty.Suit suit, CardProperty.Value value)
         {
             Suit = suit;

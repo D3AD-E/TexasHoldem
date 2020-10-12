@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using TexasHoldem.Client.Core;
 using TexasHoldem.Client.Forms;
 using TexasHoldem.Client.Utils;
 
@@ -12,7 +10,7 @@ namespace TexasHoldem.Client
     {
         public Core.Network.Client _client;
 
-        public bool IsUserAuthenticated{get; private set;}
+        public bool IsUserAuthenticated { get; private set; }
 
         public double Money { get; private set; }
 
@@ -107,7 +105,6 @@ namespace TexasHoldem.Client
                                 Money = res.Money;
                                 Username = UsernameTextB.Text;
                                 InvokeUI(() => this.Close());
-
                             }
                         });
                     });

@@ -18,7 +18,7 @@ namespace TexasHoldem.Server
 
         public List<Card> Board { get; private set; }
 
-        private PlayerActionController PlayerController { get; set; }
+        private PlayerActionController _playerController { get; set; }
 
         //public double PotSize { get; private set; }
 
@@ -36,7 +36,7 @@ namespace TexasHoldem.Server
 
         public bool IsGameInProcess { get; private set; }
 
-        private System.Timers.Timer AfkTimer;
+        private System.Timers.Timer _afkTimer;
 
         private const int DECK_SIZE = 52;
 
@@ -50,7 +50,7 @@ namespace TexasHoldem.Server
             IsGameInProcess = false;
 
             SetupDeck();
-            PlayerController = new PlayerActionController();
+            _playerController = new PlayerActionController();
             Board = new List<Card>();
             BBlindBet = 2;
         }
@@ -127,13 +127,13 @@ namespace TexasHoldem.Server
 
         public List<PlayerData> GetAllPlayers()
         {
-            return PlayerController.Players.Values.ToList();
+            return _playerController.Players.Values.ToList();
         }
 
         public List<PlayerData> GetActivePlayers()
         {
             List<PlayerData> suitablePlayers = new List<PlayerData>();
-            foreach (var player in PlayerController.Players.Values)
+            foreach (var player in _playerController.Players.Values)
             {
                 if (!player.IsPlaying)
                     continue;
@@ -144,15 +144,15 @@ namespace TexasHoldem.Server
 
         public void HandleGameEnd(GameEndType gameEnd)
         {
-            PlayerController.HandleGameEnd();
+            _playerController.HandleGameEnd();
             IsGameInProcess = false;
 
-            if(gameEnd == GameEndType.WinByFold)
+            if (gameEnd == GameEndType.WinByFold)
             {
                 var player = GetActivePlayers().FirstOrDefault();
-                
+
                 double sum = 0;
-                while(Pots.Count>0)
+                while (Pots.Count > 0)
                 {
                     var pot = Pots.Pop();
                     sum += pot.Size;
@@ -249,7 +249,7 @@ namespace TexasHoldem.Server
 
         public GameEndType HasGameEnded()
         {
-            var endType = PlayerController.HasGameEnded();
+            var endType = _playerController.HasGameEnded();
             if (endType == Enums.GameEndType.None)
             {
                 return endType;
@@ -267,9 +267,9 @@ namespace TexasHoldem.Server
                 RaiseJump = raiseAmount - CurrentBet;
                 CurrentBet = raiseAmount;
             }
-            if (PlayerController.HandleAction(id, action, CurrentBet))
+            if (_playerController.HandleAction(id, action, CurrentBet))
             {
-                Pots.Peek().Size += PlayerController.GetMoneyToPot(PlayerController.PlayerToAct.Value);
+                Pots.Peek().Size += _playerController.GetMoneyToPot(_playerController.PlayerToAct.Value);
                 return true;
             }
             else
@@ -278,7 +278,7 @@ namespace TexasHoldem.Server
 
         public List<Card> GetPendingCards()
         {
-            return DealCardsToBoard(PlayerController.GameState);
+            return DealCardsToBoard(_playerController.GameState);
         }
 
         public void Start()
@@ -291,13 +291,13 @@ namespace TexasHoldem.Server
             else
                 Pots.Clear();
 
-            PlayerController.SetupGame(BBlindBet);
+            _playerController.SetupGame(BBlindBet);
 
             CurrentBet = BBlindBet;
             var pot = new Pot
             {
                 Size = BBlindBet + BBlindBet / 2,
-                Players = PlayerController.Players.Values.OfType<Player>().ToList()
+                Players = _playerController.Players.Values.OfType<Player>().ToList()
             };
             Pots.Push(pot);
         }
@@ -314,9 +314,9 @@ namespace TexasHoldem.Server
         {
             for (int i = 0; i < 8; i++)
             {
-                if (!PlayerController.Players.ContainsKey(i))
+                if (!_playerController.Players.ContainsKey(i))
                 {
-                    PlayerController.Players.Add(i, new PlayerData(id, i, username, money, receiver));
+                    _playerController.Players.Add(i, new PlayerData(id, i, username, money, receiver));
                     CurrentPlayerAmount++;
                     return i;
                 }
@@ -329,7 +329,7 @@ namespace TexasHoldem.Server
         {
             var currPot = Pots.Peek();
 
-            var players = PlayerController.GetPlayingPlayers().OrderBy(i => i.CurrentBet).ToList();
+            var players = _playerController.GetPlayingPlayers().OrderBy(i => i.CurrentBet).ToList();
             if (players.Count() == 0)
                 return;
             var player = players[0];
@@ -385,14 +385,14 @@ namespace TexasHoldem.Server
                 Pots.Push(pot);
             }
 
-            PlayerController.HandleOrbitEnd();
+            _playerController.HandleOrbitEnd();
             CurrentBet = 0;
         }
 
         public List<PlayerBase> GetPlayers() //??????????????????? does not work otherwise, cast from linq
         {
             List<PlayerBase> toret = new List<PlayerBase>();
-            foreach (var player in PlayerController.Players.Values)
+            foreach (var player in _playerController.Players.Values)
             {
                 toret.Add(new PlayerBase() { Money = player.Money, Place = player.Place, Username = player.Username });
             }
@@ -401,67 +401,67 @@ namespace TexasHoldem.Server
 
         public void CurrentPlayerAfkTimerStart()
         {
-            if (AfkTimer == null)
+            if (_afkTimer == null)
             {
-                AfkTimer = new System.Timers.Timer();
-                AfkTimer.Enabled = true;
-                AfkTimer.Start();
-                AfkTimer.Interval = PLAYER_AFK_DELAY;
-                AfkTimer.Elapsed += new ElapsedEventHandler(AfkTimer_Tick);
+                _afkTimer = new System.Timers.Timer();
+                _afkTimer.Enabled = true;
+                _afkTimer.Start();
+                _afkTimer.Interval = PLAYER_AFK_DELAY;
+                _afkTimer.Elapsed += new ElapsedEventHandler(AfkTimer_Tick);
             }
             else
             {
-                AfkTimer.Start();
+                _afkTimer.Start();
             }
         }
 
         public void CurrentPlayerAfkTimerStop()
         {
-            if (AfkTimer != null)
-                AfkTimer.Stop();
+            if (_afkTimer != null)
+                _afkTimer.Stop();
         }
 
         public void PlayerDisconnected(int place)
         {
-            PlayerController.Players.Remove(place);
+            _playerController.Players.Remove(place);
         }
 
         private void AfkTimer_Tick(object sender, ElapsedEventArgs e)
         {
-            AfkTimer.Stop();
+            _afkTimer.Stop();
             Console.WriteLine("fold by time");
-            PlayerController.Players[PlayerController.PlayerToAct.Value].ClientReceiver.CurrentPlayerFoldByTime();
+            _playerController.Players[_playerController.PlayerToAct.Value].ClientReceiver.CurrentPlayerFoldByTime();
         }
 
         public List<Card> ForceGameEnd()
         {
             var cards = new List<Card>();
-            while(PlayerController.GameState !=GameState.Showdown)
+            while (_playerController.GameState != GameState.Showdown)
             {
                 cards.AddRange(GetPendingCards());
-                PlayerController.SkipGameState();
+                _playerController.SkipGameState();
             }
             return cards;
         }
 
         public int GetCurrentPlayerPlace()
         {
-            return PlayerController.PlayerToAct.Value;
+            return _playerController.PlayerToAct.Value;
         }
 
         public int GetBBPlace()
         {
-            return PlayerController.BBlind.Value;
+            return _playerController.BBlind.Value;
         }
 
         public int GetButtonPlace()
         {
-            return PlayerController.Button.Value;
+            return _playerController.Button.Value;
         }
 
         public bool HasOrbitEnded()
         {
-            return PlayerController.HasOrbitEnded();
+            return _playerController.HasOrbitEnded();
         }
     }
 }

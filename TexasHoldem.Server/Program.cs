@@ -1,12 +1,9 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Threading;
-using TexasHoldem.Server.Core.Network;
 
 namespace TexasHoldem.Server
 {
-    class Program
+    internal class Program
     {
         private static void Main(string[] args)
         {

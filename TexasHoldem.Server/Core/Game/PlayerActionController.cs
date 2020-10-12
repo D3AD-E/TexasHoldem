@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Transactions;
-using TexasHoldemCommonAssembly.Enums;
-using TexasHoldemCommonAssembly.Game.Entities;
 using TexasHoldem.Server.Core.Game.Entities;
 using TexasHoldem.Server.Enums;
+using TexasHoldemCommonAssembly.Enums;
+using TexasHoldemCommonAssembly.Game.Entities;
 
 namespace TexasHoldem.Server.Core.Game
 {
@@ -26,7 +23,7 @@ namespace TexasHoldem.Server.Core.Game
 
         public Dictionary<int, PlayerData> Players { get; set; }
 
-        private int orbitEnd;
+        private int _orbitEnd;
 
         public PlayerActionController()
         {
@@ -41,22 +38,17 @@ namespace TexasHoldem.Server.Core.Game
 
         public void SetupGame(double BBBet)
         {
-            foreach(var player in Players.Values)
+            foreach (var player in Players.Values)
             {
                 player.IsPlaying = true;
             }
 
             GameState = GameState.PreFlop;
 
-            if(Button == null)
+            if (Button == null)
             {
                 SetupNewGame();
             }
-            else
-            {
-                RefreshGame();
-            }
-
 
             Players[BBlind.Value].Money -= BBBet;
             Players[BBlind.Value].CurrentBet = BBBet;
@@ -81,10 +73,10 @@ namespace TexasHoldem.Server.Core.Game
                 BBlind = SBlind.GetNext();
                 PlayerToAct = BBlind.GetNext();
             }
-            orbitEnd = PlayerToAct.GetPrevious().Value;
+            _orbitEnd = PlayerToAct.GetPrevious().Value;
         }
 
-        public bool HandleAction(Guid id, PlayerAction action, double bet) //bug with all in
+        public bool HandleAction(Guid id, PlayerAction action, double bet)
         {
             PlayerData PlayerToHandle = Players[PlayerToAct.Value];
             if (PlayerToHandle.ID != id)
@@ -122,7 +114,7 @@ namespace TexasHoldem.Server.Core.Game
             else if (action == PlayerAction.Raise)
             {
                 PlayerToHandle.Money -= moneyToSubstract;
-                orbitEnd = GetPreviuosPlayingPlace(PlayerToAct).Value;
+                _orbitEnd = GetPreviuosPlayingPlace(PlayerToAct).Value;
             }
             else if (action == PlayerAction.Check)
             {
@@ -161,10 +153,11 @@ namespace TexasHoldem.Server.Core.Game
             while (toret != from);
             return toret;
         }
+
         public void HandleOrbitEnd()
         {
             PlayerToAct = GetNextPlayingPlace(Button);
-            orbitEnd = Button.Value;
+            _orbitEnd = Button.Value;
             GameState++;
 
             foreach (var player in Players.Values)
@@ -178,9 +171,8 @@ namespace TexasHoldem.Server.Core.Game
 
         public bool HasOrbitEnded()
         {
-            if (PlayerToAct.Value == orbitEnd)
+            if (PlayerToAct.Value == _orbitEnd)
             {
-                
                 return true;
             }
             else
@@ -211,11 +203,10 @@ namespace TexasHoldem.Server.Core.Game
                     {
                         nonFolders++;
                     }
-                    if(player.Money>0)
+                    if (player.Money > 0)
                     {
                         haveMoney++;
                     }
-                    
                 }
                 if (haveMoney == 1)
                     return GameEndType.AllIn;
@@ -232,12 +223,7 @@ namespace TexasHoldem.Server.Core.Game
             BBlind = SBlind.GetNext();
             PlayerToAct = BBlind.GetNext();
 
-            orbitEnd = PlayerToAct.GetPrevious().Value;
-        }
-
-        public void RefreshGame()
-        {
-            //throw new NotImplementedException();
+            _orbitEnd = PlayerToAct.GetPrevious().Value;
         }
 
         public List<Player> GetPlayingPlayers()

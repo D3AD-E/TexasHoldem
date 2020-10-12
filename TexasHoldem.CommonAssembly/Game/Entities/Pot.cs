@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using TexasHoldemCommonAssembly.Game.Entities;
 
 namespace TexasHoldem.CommonAssembly.Game.Entities

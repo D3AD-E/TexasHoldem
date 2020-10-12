@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
 using System.Text;
 using System.Windows.Forms;
 using TexasHoldem.CommonAssembly.Game.Entities;
@@ -11,7 +8,8 @@ namespace TexasHoldem.Client.Utils.UserControls
 {
     public partial class PotsView : UserControl
     {
-        public Stack<Pot>Pots { get; set; }
+        public Stack<Pot> Pots { get; set; }
+
         public PotsView()
         {
             Pots = new Stack<Pot>();
@@ -29,7 +27,7 @@ namespace TexasHoldem.Client.Utils.UserControls
                 potSum += pot.Size;
             }
             sb.Append("Sum: " + potSum);
-            this.Invoke((Action)(()=>label1.Text = sb.ToString()));
+            this.Invoke((Action)(() => label1.Text = sb.ToString()));
         }
     }
 }

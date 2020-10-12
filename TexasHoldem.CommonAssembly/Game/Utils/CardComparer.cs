@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
 using TexasHoldemCommonAssembly.Game.Entities;
 
 namespace TexasHoldemCommonAssembly.Game.Utils
 {
-    class CardComparer : IEqualityComparer<Card>
+    internal class CardComparer : IEqualityComparer<Card>
     {
         public bool Equals([AllowNull] Card x, [AllowNull] Card y)
         {

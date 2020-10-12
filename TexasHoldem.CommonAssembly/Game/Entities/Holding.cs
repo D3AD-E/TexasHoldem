@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using TexasHoldemCommonAssembly.Enums;
 using TexasHoldemCommonAssembly.Game.Utils;
 
@@ -14,7 +12,6 @@ namespace TexasHoldemCommonAssembly.Game.Entities
         private List<Card> Cards;
 
         private Card[] CardsInPlay;
-
 
         public Rank Rank { get; private set; }
 

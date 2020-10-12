@@ -1,7 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using TexasHoldem.Server.DAL;
 using TexasHoldem.Server.DAL.Models;
@@ -61,7 +58,6 @@ namespace TexasHoldem.Server.Core.Services
             }
 
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
-
 
             User user = new User
             {

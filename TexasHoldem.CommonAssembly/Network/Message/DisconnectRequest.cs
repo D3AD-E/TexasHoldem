@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace TexasHoldemCommonAssembly.Network.Message
 {
     [Serializable]
-    public class DisconnectRequest :RequestMessageBase
+    public class DisconnectRequest : RequestMessageBase
     {
     }
 }

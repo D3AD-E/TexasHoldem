@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Threading.Tasks;
+using TexasHoldem.CommonAssembly.Network.Message;
 using TexasHoldem.Server.Enums;
 using TexasHoldem.Server.Utils;
 using TexasHoldemCommonAssembly.Enums;
@@ -165,6 +166,10 @@ namespace TexasHoldem.Server.Core.Network
                 {
                     PlayerActionHandlerAsync(msg as PlayerActionClient).ConfigureAwait(false);
                 }
+                else if (type == typeof(HeartbeatRequest))
+                {
+                    HeartbeatHandler(msg as HeartbeatRequest);
+                }
                 else if (type == typeof(ShowRoomsRequest))
                 {
                     ShowRoomsHandler(msg as ShowRoomsRequest);
@@ -201,6 +206,12 @@ namespace TexasHoldem.Server.Core.Network
                     AuthenticateHandler(msg as AuthenticateRequest).ConfigureAwait(false);
                 }
             }
+        }
+
+        private void HeartbeatHandler(HeartbeatRequest req)
+        {
+            var res = new HeartbeatResponse(req);
+            SendMessage(res);
         }
 
         private void AddMoneyRequestPhraseHandle(AddMoneyPhraseRequest req)
@@ -417,7 +428,7 @@ namespace TexasHoldem.Server.Core.Network
             var players = Game.GetAllPlayers();
             foreach (var player in players)
             {
-                if(player.Money == 0)
+                if (player.Money == 0)
                 {
                     Game.PlayerDisconnected(player.Place);
                     if (players.Count < 2)
@@ -478,11 +489,11 @@ namespace TexasHoldem.Server.Core.Network
                     var endType = Game.HasGameEnded();
                     if (endType != GameEndType.None)
                     {
-                        if(endType == GameEndType.AllIn)
+                        if (endType == GameEndType.AllIn)
                         {
                             endType = GameEndType.Showdown;
                             var cards = Game.ForceGameEnd();
-                            if(cards!= null && cards.Count()>0)
+                            if (cards != null && cards.Count() > 0)
                                 SendCards(cards);
                         }
 
@@ -495,7 +506,7 @@ namespace TexasHoldem.Server.Core.Network
                             user.Money = player.Money;
                             await Server.Service.UpdateUser(user);
 
-                            if (player.IsDisconnected || player.Money ==0)
+                            if (player.IsDisconnected || player.Money == 0)
                                 Game.PlayerDisconnected(player.Place);
                         }
 

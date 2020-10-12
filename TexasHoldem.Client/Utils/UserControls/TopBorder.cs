@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Text;
-using System.Windows.Forms;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 namespace TexasHoldem.Client.Utils.UserControls
 {
@@ -13,6 +10,7 @@ namespace TexasHoldem.Client.Utils.UserControls
     {
         [Description("Does the border contain Minimize button"), Category("View")]
         public bool HasMinimize { get; set; }
+
         //[Description("Color of minimize button"), Category("View")]
         //public Color MinimizeColor { get; set; }
         //[Description("Color of Close button"), Category("View")]
@@ -36,6 +34,7 @@ namespace TexasHoldem.Client.Utils.UserControls
 
         [DllImport("user32.dll")]
         public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
+
         [DllImport("user32.dll")]
         public static extern bool ReleaseCapture();
 
