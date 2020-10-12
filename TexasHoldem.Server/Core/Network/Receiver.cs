@@ -428,7 +428,7 @@ namespace TexasHoldem.Server.Core.Network
             var players = Game.GetAllPlayers();
             foreach (var player in players)
             {
-                if (player.Money == 0)
+                if (player.Money == 0 || player.IsDisconnected)
                 {
                     Game.PlayerDisconnected(player.Place);
                     if (players.Count < 2)

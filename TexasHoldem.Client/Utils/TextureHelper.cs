@@ -11,8 +11,15 @@ namespace TexasHoldem.Client.Utils
         private const int GAP_SIZE_HEIGHT = 11;
         private const int GAP_SIZE_WIDTH = 12;
 
+        private const string FAIL_PATH = @"../../Pics/CardBack3.png";
+
         public static Image CardToImage(Card card, string path)
         {
+            if(card == null)
+            {
+                return Image.FromFile(FAIL_PATH);
+            }
+
             int offsetHeight = GAP_SIZE_HEIGHT;
             int offsetWidth = GAP_SIZE_WIDTH;
 
@@ -35,8 +42,7 @@ namespace TexasHoldem.Client.Utils
         private static Image CropImage(Image img, Rectangle cropArea)
         {
             Bitmap bmpImage = new Bitmap(img);
-            Bitmap bmpCrop = bmpImage.Clone(cropArea,
-            bmpImage.PixelFormat);
+            Bitmap bmpCrop = bmpImage.Clone(cropArea, bmpImage.PixelFormat);
             return bmpCrop;
         }
     }

@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PlayerDisplay));
             this.MoneyLabel = new System.Windows.Forms.Label();
             this.ActionLabel = new System.Windows.Forms.Label();
             this.UsernameLabel = new System.Windows.Forms.Label();
@@ -75,7 +74,6 @@
             // CardImg1
             // 
             this.CardImg1.BackColor = System.Drawing.Color.Transparent;
-            this.CardImg1.Image = ((System.Drawing.Image)(resources.GetObject("CardImg1.Image")));
             this.CardImg1.InitialImage = null;
             this.CardImg1.Location = new System.Drawing.Point(61, 1);
             this.CardImg1.Name = "CardImg1";
@@ -86,7 +84,6 @@
             // 
             // CardImg0
             // 
-            this.CardImg0.Image = ((System.Drawing.Image)(resources.GetObject("CardImg0.Image")));
             this.CardImg0.InitialImage = null;
             this.CardImg0.Location = new System.Drawing.Point(1, 1);
             this.CardImg0.Name = "CardImg0";

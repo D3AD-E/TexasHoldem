@@ -146,29 +146,14 @@ namespace TexasHoldem.Client
                     _playerController.Players.Remove(player.Place);
                     continue;
                 }
+                else
+                {
+                    _playerDisplays[player.Place].CardImg0.Image = TextureHelper.CardToImage(null, string.Empty);
+                    _playerDisplays[player.Place].CardImg1.Image = TextureHelper.CardToImage(null, string.Empty);
+                }
             }
             await Task.Delay(2800);
             _board.Clear();
-
-            foreach (var display in _playerDisplays)
-            {
-                if (display.CardImg0.Image != null)
-                {
-                    InvokeUI(() =>
-                    {
-                        display.CardImg0.Image.Dispose();
-                        display.CardImg0.Image = null;
-                    });
-                }
-                if (display.CardImg1.Image != null)
-                {
-                    InvokeUI(() =>
-                    {
-                        display.CardImg1.Image.Dispose();
-                        display.CardImg1.Image = null;
-                    });
-                }
-            }
 
             foreach (var pictureBox in _boardImg)
             {
@@ -263,10 +248,11 @@ namespace TexasHoldem.Client
                 RaiseAmountUD.Minimum = (decimal)_currentBet * 2;
                 RaiseAmountUD.Maximum = (decimal)(_currentPlayer.Money + _currentPlayer.CurrentBet);
 
+                _playerDisplays[_playerController.PlayerToAct.Value].SetupPlayerAfkAwaiting();
+
                 potsView.RefreshPots();
             });
 
-            InvokeUI(() => _playerDisplays[_playerController.PlayerToAct.Value].SetupPlayerAfkAwaiting());
             if (_afkTimer == null)
             {
                 _afkTimer = new System.Timers.Timer();
@@ -289,6 +275,9 @@ namespace TexasHoldem.Client
             {
                 _playerDisplays[msg.Player.Place].UsernameLabel.Text = msg.Player.Username;
                 _playerDisplays[msg.Player.Place].MoneyLabel.Text = msg.Player.Money.ToString();
+
+                _playerDisplays[msg.Player.Place].CardImg0.Image = TextureHelper.CardToImage(null, string.Empty);
+                _playerDisplays[msg.Player.Place].CardImg1.Image = TextureHelper.CardToImage(null, string.Empty);
             });
         }
 
@@ -510,6 +499,8 @@ namespace TexasHoldem.Client
             {
                 _playerDisplays[player.Place].UsernameLabel.Text = player.Username;
                 _playerDisplays[player.Place].MoneyLabel.Text = player.Money.ToString();
+                _playerDisplays[player.Place].CardImg0.Image = TextureHelper.CardToImage(null, string.Empty);
+                _playerDisplays[player.Place].CardImg1.Image = TextureHelper.CardToImage(null, string.Empty);
             }
             _playerDisplays[_currentPlayer.Place].UsernameLabel.Text = _currentPlayer.Username;
             _playerDisplays[_currentPlayer.Place].MoneyLabel.Text = _currentPlayer.Money.ToString();

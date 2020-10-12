@@ -16,6 +16,17 @@ namespace TexasHoldem.Client
             UsernameLabel.Text = "Empty seat";
             MoneyLabel.Text = string.Empty;
             ActionLabel.Text = string.Empty;
+
+            if(CardImg0.Image != null)
+            {
+                CardImg0.Image.Dispose();
+                CardImg0.Image = null;
+            }
+            if(CardImg1.Image != null)
+            {
+                CardImg1.Image.Dispose();
+                CardImg1.Image = null;
+            }
         }
 
         private void PlayerDisplay_Load(object sender, EventArgs e)
