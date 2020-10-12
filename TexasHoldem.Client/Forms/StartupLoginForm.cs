@@ -75,9 +75,15 @@ namespace TexasHoldem.Client
             else
             {
                 EnableControls(false);
+                var messageBox = new FlatMessageBox("Connecting", "Trying to reach the server...");
+                messageBox.Show();
                 await Task.Run(() => Connect())
                     .ContinueWith(t =>
                     {
+                        InvokeUI(() =>
+                        {
+                            messageBox.Close();
+                        });
                         if (t.Exception != null)
                         {
                             ExeptionHandler.HandleExeption(t.Exception);

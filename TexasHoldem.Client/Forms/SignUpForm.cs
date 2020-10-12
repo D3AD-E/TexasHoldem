@@ -1,20 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using TexasHoldem.Client.Core.Network;
+using TexasHoldem.Client.Utils;
 
 namespace TexasHoldem.Client.Forms
 {
     public partial class SignUpForm : Form
     {
-
         private readonly Core.Network.Client _client;
+
         public SignUpForm()
         {
             _client = Core.Network.Client.Instance;
@@ -23,7 +19,6 @@ namespace TexasHoldem.Client.Forms
 
         private void SignUpFButton_Click(object sender, EventArgs e)
         {
-
             if (UsernameTextB.TextLength < 3)
             {
                 errorProvider.SetError(Password1TextB, "Username must be at lest 3 character long!");
@@ -52,7 +47,23 @@ namespace TexasHoldem.Client.Forms
 
             EnableControls(false);
 
-            Task.Run(() => Connect()).ContinueWith(t=>EnableControls(true));
+            var messageBox = new FlatMessageBox("Connecting", "Trying to reach the server...");
+            messageBox.Show();
+            Task.Run(() => Connect())
+                .ContinueWith(t =>
+                {
+                    InvokeUI(() =>
+                    {
+                        messageBox.Close();
+                    });
+                    if (t.Exception != null)
+                    {
+                        ExeptionHandler.HandleExeption(t.Exception);
+                        EnableControls(true);
+                        return;
+                    }
+                    SignUp();
+                });
         }
 
         private void EnableControls(bool enabled)
@@ -68,7 +79,7 @@ namespace TexasHoldem.Client.Forms
             });
         }
 
-        private void Connect()
+        private Task Connect()
         {
             if (_client.Status == TexasHoldemCommonAssembly.Enums.Status.Disconnected)
             {
@@ -78,12 +89,10 @@ namespace TexasHoldem.Client.Forms
                 }
                 catch (Exception ex)
                 {
-                    var messageBox = new FlatMessageBox("Error while connecting to server", ex.Message, Color.Red, Color.Black);
-                    messageBox.ShowDialog();
-                    return;
+                    return Task.FromException(ex);
                 }
             }
-            SignUp();
+            return Task.CompletedTask;
         }
 
         private void SignUp()
@@ -103,7 +112,6 @@ namespace TexasHoldem.Client.Forms
                     messageBox.ShowDialog();
                     this.DialogResult = DialogResult.OK;
                     InvokeUI(() => this.Close());
-
                 }
             });
         }

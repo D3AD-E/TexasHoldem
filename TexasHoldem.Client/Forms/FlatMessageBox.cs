@@ -20,7 +20,7 @@ namespace TexasHoldem.Client.Forms
             TopLabel.Text = topText;
             BottomLabel.Text = bottomText;
 
-            if(panel1.Width + panel1.Location.X < TopLabel.Size.Width + TopLabel.Location.X)
+            //if(panel1.Width + panel1.Location.X < TopLabel.Size.Width + TopLabel.Location.X)
             {
                 TopLabel.Left = panel1.Location.X + (panel1.Width-TopLabel.Size.Width) / 2;
             }
