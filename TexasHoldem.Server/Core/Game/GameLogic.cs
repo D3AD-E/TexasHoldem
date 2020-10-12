@@ -206,45 +206,6 @@ namespace TexasHoldem.Server
                         break;
                 }
             }
-            //List<PlayerData> suitablePlayers = new List<PlayerData>();
-            //foreach (var player in PlayerController.Players.Values)
-            //{
-            //    if (!player.IsPlaying)
-            //        continue;
-            //    DetermineHolding(player);
-            //    suitablePlayers.Add(player);
-            //}
-            //var sorted = suitablePlayers.OrderByDescending(i => i.Holding);
-
-            ////if (sorted.Count() == 1)
-            ////{
-            ////    var Winner = sorted.First();
-            ////    Winner.Money += PotSize;
-            ////    PotSize = 0;
-            ////    return;
-            ////}
-
-            //var bestPlayer = sorted.First();
-
-            //int winnersAmount = 0;
-
-            //foreach (var player in sorted)
-            //{
-            //    if (player.Holding == bestPlayer.Holding)
-            //        winnersAmount++;
-            //    else
-            //        break;
-            //}
-
-            //int i = 0;
-            //foreach (var player in sorted)
-            //{
-            //    player.Money += PotSize / winnersAmount;
-            //    i++;
-            //    if (i == winnersAmount)
-            //        break;
-            //}
-            //PotSize = 0;
         }
 
         public GameEndType HasGameEnded()
@@ -325,7 +286,7 @@ namespace TexasHoldem.Server
             return -1;
         }
 
-        public void HandleOrbitEnd()
+        private void HandlePots()
         {
             var currPot = Pots.Peek();
 
@@ -378,18 +339,26 @@ namespace TexasHoldem.Server
                 var pot = new Pot();
                 int playersInPot = playersAmount - sameBetIndexStart;
                 pot.Players.AddRange(players.GetRange(sameBetIndexStart, playersInPot));
+
+                if (currPot == pot)
+                    return;
+
                 pot.Size = players[sameBetIndexStart].CurrentBet * playersInPot;
 
                 currPot.Size -= pot.Size;
 
                 Pots.Push(pot);
             }
+        }
 
+        public void HandleOrbitEnd()
+        {
+            HandlePots();
             _playerController.HandleOrbitEnd();
             CurrentBet = 0;
         }
 
-        public List<PlayerBase> GetPlayers() //??????????????????? does not work otherwise, cast from linq
+        public List<PlayerBase> GetPlayers() // does not work otherwise, cast from linq
         {
             List<PlayerBase> toret = new List<PlayerBase>();
             foreach (var player in _playerController.Players.Values)

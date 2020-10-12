@@ -664,8 +664,10 @@ namespace TexasHoldem.Client
                 var pot = new Pot();
                 int playersInPot = playersAmount - sameBetIndexStart;
                 pot.Players.AddRange(players.GetRange(sameBetIndexStart, playersInPot));
-                pot.Size = players[sameBetIndexStart].CurrentBet * playersInPot;
+                if (pot.Equals(currPot))
+                    return;
 
+                pot.Size = players[sameBetIndexStart].CurrentBet * playersInPot;
                 currPot.Size -= pot.Size;
 
                 _pots.Push(pot);
