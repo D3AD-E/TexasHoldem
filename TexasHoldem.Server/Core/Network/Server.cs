@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Sockets;
 using TexasHoldem.Server.Core.Services;
 using TexasHoldemCommonAssembly.Game.Entities;
@@ -22,6 +23,22 @@ namespace TexasHoldem.Server.Core.Network
 
         public IUserService Service { get; private set; }
 
+        private string GetLocalIPAddress()
+        {
+            IPHostEntry host;
+            string localIP = "";
+            host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (IPAddress ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    localIP = ip.ToString();
+                    break;
+                }
+            }
+            return localIP;
+        }
+
         public Server(IServiceProvider provider)
         {
             Service = (IUserService)provider.GetService(typeof(IUserService));
@@ -34,8 +51,13 @@ namespace TexasHoldem.Server.Core.Network
         {
             if (!IsStarted)
             {
+                string localAddrString = GetLocalIPAddress();
+                Console.WriteLine("Got ip: " + localAddrString);
+
+                IPAddress localAddr = IPAddress.Parse(localAddrString);
+
                 Console.WriteLine("Server started on port " + PORT);
-                Listener = new TcpListener(System.Net.IPAddress.Any, PORT);
+                Listener = new TcpListener(localAddr, PORT);
                 Listener.Start();
                 IsStarted = true;
 

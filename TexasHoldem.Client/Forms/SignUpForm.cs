@@ -85,7 +85,7 @@ namespace TexasHoldem.Client.Forms
             {
                 try
                 {
-                    _client.Connect("localhost", 8888);
+                    _client.Connect();
                 }
                 catch (Exception ex)
                 {

@@ -16,6 +16,11 @@ namespace TexasHoldem.Client
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
+            var ipform = new ConnectionIPForm();
+            ipform.ShowDialog();
+
+            Core.Network.Client.Instance.SetAddress(ipform.Ip);
+
             var startUpForm = new StartupLoginForm();
             Application.Run(startUpForm);
 

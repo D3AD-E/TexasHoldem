@@ -20,13 +20,13 @@ namespace TexasHoldem.Client.Core.Network
 
         public string Address { get; private set; }
 
-        public int Port { get; private set; }
-
         public Status Status { get; private set; }
 
         public Queue<MessageBase> MessageQueue { get; private set; }
 
         public event Delegates.MessageReceivedDelegate MessageReceived;
+
+        public const int PORT = 8888;
 
         private static Client _instance;
 
@@ -42,12 +42,15 @@ namespace TexasHoldem.Client.Core.Network
             Status = Status.Disconnected;
         }
 
-        public void Connect(string address, int port)
+        public void SetAddress(string address)
         {
             Address = address;
-            Port = port;
+        }
+
+        public void Connect()
+        {
             TcpClient = new TcpClient();
-            TcpClient.Connect(Address, Port);
+            TcpClient.Connect(Address, PORT);
             Status = Status.Connected;
             TcpClient.ReceiveBufferSize = 1024;
             TcpClient.SendBufferSize = 1024;
