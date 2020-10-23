@@ -8,6 +8,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="bin\Pics\BackgroundWide.jpg" />
+    <Content Include="bin\Pics\CardBack.png" />
+    <Content Include="bin\Pics\CardBack2.png" />
+    <Content Include="bin\Pics\CardBack3.png" />
+    <Content Include="bin\Pics\cards.png" />
+    <Content Include="bin\Pics\table.png" />
+    <Content Include="bin\Pics\table2.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="bin\Pics\Background.jpg" />
   </ItemGroup>
 

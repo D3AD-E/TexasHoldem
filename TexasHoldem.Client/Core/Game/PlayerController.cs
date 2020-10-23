@@ -158,10 +158,10 @@ namespace TexasHoldem.Client.Core.Game
             int maxVal = 8;
             BBlind = new Place(bBPlace, maxVal);
             Button = new Place(buttonPlace, maxVal);
-            SBlind = BBlind.GetPrevious();
+            SBlind = GetPreviuosPlayingPlace(BBlind);
             PlayerToAct = new Place(playerToAct, maxVal);
             GameState = GameState.PreFlop;
-            _orbitEnd = PlayerToAct.GetPrevious().Value;
+            _orbitEnd = GetPreviuosPlayingPlace(PlayerToAct).Value;
 
             Players[BBlind.Value].Money -= BBBet;
             Players[BBlind.Value].CurrentBet = BBBet;
@@ -179,6 +179,17 @@ namespace TexasHoldem.Client.Core.Game
                     amount++;
             }
             return amount;
+        }
+
+        public List<Player> GetPlayingPlayers()
+        {
+            var players = new List<Player>();
+            foreach (var player in Players.Values)
+            {
+                if (player.IsPlaying)
+                    players.Add(player);
+            }
+            return players;
         }
 
         public List<Player> GetPlayingPlayersForPots()

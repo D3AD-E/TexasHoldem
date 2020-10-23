@@ -49,8 +49,9 @@
             this.FoldFButton = new TexasHoldem.Client.Utils.UserControls.FlatButton();
             this.CallFButton = new TexasHoldem.Client.Utils.UserControls.FlatButton();
             this.RaiseFButton = new TexasHoldem.Client.Utils.UserControls.FlatButton();
-            this.topBorder1 = new TexasHoldem.Client.Utils.UserControls.TopBorder();
             this.potsView = new TexasHoldem.Client.Utils.UserControls.PotsView();
+            this.topBorder1 = new TexasHoldem.Client.Utils.UserControls.TopBorder();
+            this.SplitChanceLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.RaiseAmountUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.BoardCard1Img)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.BoardCard2Img)).BeginInit();
@@ -234,6 +235,7 @@
             // 
             this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(248)))), ((int)(((byte)(247)))), ((int)(((byte)(255)))));
             this.panel1.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("panel1.BackgroundImage")));
+            this.panel1.Controls.Add(this.SplitChanceLabel);
             this.panel1.Controls.Add(this.FoldFButton);
             this.panel1.Controls.Add(this.CallFButton);
             this.panel1.Controls.Add(this.RaiseFButton);
@@ -301,6 +303,15 @@
             this.RaiseFButton.UseVisualStyleBackColor = true;
             this.RaiseFButton.Click += new System.EventHandler(this.RaiseFButton_Click);
             // 
+            // potsView
+            // 
+            this.potsView.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.potsView.Location = new System.Drawing.Point(298, 270);
+            this.potsView.Margin = new System.Windows.Forms.Padding(4);
+            this.potsView.Name = "potsView";
+            this.potsView.Size = new System.Drawing.Size(253, 127);
+            this.potsView.TabIndex = 15;
+            // 
             // topBorder1
             // 
             this.topBorder1.BackColor = System.Drawing.Color.Transparent;
@@ -311,14 +322,13 @@
             this.topBorder1.Size = new System.Drawing.Size(904, 31);
             this.topBorder1.TabIndex = 15;
             // 
-            // potsView
+            // SplitChanceLabel
             // 
-            this.potsView.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.potsView.Location = new System.Drawing.Point(298, 270);
-            this.potsView.Margin = new System.Windows.Forms.Padding(4);
-            this.potsView.Name = "potsView";
-            this.potsView.Size = new System.Drawing.Size(253, 127);
-            this.potsView.TabIndex = 15;
+            this.SplitChanceLabel.AutoSize = true;
+            this.SplitChanceLabel.Location = new System.Drawing.Point(36, 535);
+            this.SplitChanceLabel.Name = "SplitChanceLabel";
+            this.SplitChanceLabel.Size = new System.Drawing.Size(0, 18);
+            this.SplitChanceLabel.TabIndex = 16;
             // 
             // GameForm
             // 
@@ -371,6 +381,7 @@
         private Utils.UserControls.FlatButton RaiseFButton;
         private Utils.UserControls.TopBorder topBorder1;
         private Utils.UserControls.PotsView potsView;
+        private System.Windows.Forms.Label SplitChanceLabel;
     }
 }
 

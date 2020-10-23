@@ -118,9 +118,8 @@ namespace TexasHoldem.Server
 
         private void DetermineHolding(Player player)
         {
-            var toDetermine = new Card[player.Hand.Length + Board.Count()];
-            player.Hand.CopyTo(toDetermine, 0);
-            Board.CopyTo(toDetermine, player.Hand.Length);
+            var toDetermine = player.Hand.ToList();
+            toDetermine.AddRange(Board);
 
             player.Holding = new Holding(toDetermine);
         }

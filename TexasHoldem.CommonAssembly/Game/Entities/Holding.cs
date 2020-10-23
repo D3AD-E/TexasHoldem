@@ -15,11 +15,11 @@ namespace TexasHoldemCommonAssembly.Game.Entities
 
         public Rank Rank { get; private set; }
 
-        public Holding(Card[] cards)
+        public Holding(List<Card> cards)
         {
             CardsInPlay = new Card[5];
-            Cards = new List<Card>();
-            Cards = cards.ToList();
+
+            Cards = cards;
             Cards.Sort((a, b) => b.CompareTo(a));
             Rank = DetermineRank();
         }

@@ -44,6 +44,8 @@ namespace TexasHoldem.Client
 
         private bool _isGameInProgress;
 
+        private bool _isGameInAllIn;
+
         private const string PATH = @"../../Pics/cards.png";
 
         private const int TIMER_INTERVAL = 200;//in ms
@@ -57,6 +59,7 @@ namespace TexasHoldem.Client
             _playerController = new PlayerController();
             _board = new List<Card>();
             _pots = new Stack<Pot>();
+            _isGameInAllIn = false;
 
             _currentPlayer = new Player
             {
@@ -110,17 +113,25 @@ namespace TexasHoldem.Client
             }
             if (msg.Showdown)
             {
-                _playerController.Players[msg.Place].Hand[0] = msg.Cards[0];
-                _playerController.Players[msg.Place].Hand[1] = msg.Cards[1];
-
-                _playerDisplays[msg.Place].CardImg0.Image = TextureHelper.CardToImage(msg.Cards[0], PATH);
-                _playerDisplays[msg.Place].CardImg1.Image = TextureHelper.CardToImage(msg.Cards[1], PATH);
+                SetCards(msg.Place, msg.Cards);
             }
             _activePlayers--;
             if (_activePlayers == 1)
             {
                 GameEndingHandler();
             }
+        }
+
+        private void SetCards(int place, List<Card> cards)
+        {
+            _playerController.Players[place].Hand[0] = cards[0];
+            _playerController.Players[place].Hand[1] = cards[1];
+
+            InvokeUI(() =>
+            {
+                _playerDisplays[place].CardImg0.Image = TextureHelper.CardToImage(cards[0], PATH);
+                _playerDisplays[place].CardImg1.Image = TextureHelper.CardToImage(cards[1], PATH);
+            });
         }
 
         private void GameEndingHandler()
@@ -131,8 +142,8 @@ namespace TexasHoldem.Client
                     continue;
                 DetermineHolding(player);
             }
-            DetermineWinner();
 
+            DetermineWinner();
             HandleGameEnd();
         }
 
@@ -222,6 +233,7 @@ namespace TexasHoldem.Client
         private void GameInfoHandler(GameInfoServer msg)            //BAD
         {
             _isGameInProgress = true;
+            _isGameInAllIn = false;
             _playerController.Setup(msg.BBPlace, msg.ButtonPlace, msg.PlayerToAct, msg.BBBet);
             _bigBlindBet = msg.BBBet;
             _currentBet = msg.BBBet;
@@ -249,6 +261,7 @@ namespace TexasHoldem.Client
                 RaiseAmountUD.Maximum = (decimal)(_currentPlayer.Money + _currentPlayer.CurrentBet);
 
                 _playerDisplays[_playerController.PlayerToAct.Value].SetupPlayerAfkAwaiting();
+                SplitChanceLabel.Text = string.Empty;
 
                 potsView.RefreshPots();
             });
@@ -284,50 +297,50 @@ namespace TexasHoldem.Client
         private void PlayerActionHandler(PlayerActionServer msg)
         {
             HandlePlayerAction(msg.PlayerPos, msg.Action, msg.RaiseAmount);
-            //string action = msg.Action.ToString();
-            //if (msg.RaiseAmount != 0)
-            //{
-            //    action += " for " + msg.RaiseAmount;
-            //}
+        }
 
-            //CurrentBet += msg.RaiseAmount;
+        private bool IsReadyForPercentageCount()
+        {
+            if (!_isGameInAllIn)
+                return false;
+            foreach (var player in _playerController.Players.Values)
+            {
+                if (player.IsPlaying && (player.Hand == null || player.Hand.Length == 0))
+                    return false;
+            }
+            return true;
+        }
 
-            //if (PlayerController.HandleAction(msg.Action, CurrentBet))
-            //    GameStateChanged();
+        private void RefreshProbability()
+        {
+            var players = _playerController.GetPlayingPlayers();
+            foreach (var player in players)
+            {
+                if (player.Holding == null)
+                    DetermineHolding(player);
+            }
 
-            //PotSize += PlayerController.GetMoneyToPot(msg.PlayerPos);
+            var probabilityCounter = new ProbabilityCounter(players, _board);
+            double splitChance;
+            var probabilities = probabilityCounter.GetProbability(out splitChance);
 
-            //if(PlayerController.HasGameEnded())
-            //{
-            //    int winnerPlace = PlayerController.GetWinnerPlace();
-            //    if (winnerPlace == -1)
-            //        throw new Exception("No active players");
-            //    RefreshPlayerDisplay(winnerPlace, "Won "+PotSize);
-            //    PotSize = 0;
-            //    PlayerController.HandleGameEnding();
-            //    RefreshGame().ConfigureAwait(false);
-            //    RefreshPotDisplay();
-            //    ActionButtonsBehaviour(false);
-            //    return;
-            //}
-
-            //if (PlayerController.GameState == GameState.Showdown)
-            //    ActivePlayers = PlayerController.GetPlayingPlayersAmount();
-
-            //RefreshPlayerDisplay(msg.PlayerPos, action);
-            //RefreshPotDisplay();
-            //ActionButtonsBehaviour(PlayerController.IsCurrentPlayerTurn(CurrentPlayer.Place));
+            foreach (var place in probabilities.Keys)
+            {
+                string toShow = (probabilities[place] * 100) + "%";
+                RefreshPlayerDisplay(place, toShow);
+            }
+            InvokeUI(() => SplitChanceLabel.Text = "Chance to split = " + (splitChance * 100) + "%");
         }
 
         private void CardInfoHandler(CardInfoServer msg)
         {
             if (msg.ToHand)
             {
-                _playerController.Players[msg.Place].Hand[0] = msg.Cards[0];
-                _playerController.Players[msg.Place].Hand[1] = msg.Cards[1];
-
-                _playerDisplays[msg.Place].CardImg0.Image = TextureHelper.CardToImage(msg.Cards[0], PATH);
-                _playerDisplays[msg.Place].CardImg1.Image = TextureHelper.CardToImage(msg.Cards[1], PATH);
+                SetCards(msg.Place, msg.Cards);
+                if(IsReadyForPercentageCount())
+                {
+                    RefreshProbability();
+                }
             }
             else
             {
@@ -340,7 +353,20 @@ namespace TexasHoldem.Client
 
                     _boardImg[i].Image = TextureHelper.CardToImage(_board[i], PATH);
                 }
+
+                if (IsReadyForPercentageCount() || _board.Count() < 5)
+                {
+                    RefreshProbability();
+                }
+                else if(_board.Count() == 5 && _isGameInAllIn)
+                {
+                    RefreshAllPlayerDisplays();
+                    GameEndingHandler();
+                    return;
+                }
+
                 DetermineHolding(_playerController.Players[_currentPlayer.Place]);
+
                 InvokeUI(() =>
                 {
                     HoldingLabel.Text = _playerController.Players[_currentPlayer.Place].Holding.ToString();
@@ -348,11 +374,18 @@ namespace TexasHoldem.Client
             }
         }
 
+        private void RefreshAllPlayerDisplays()
+        {
+            foreach (var player in _playerController.Players.Values)
+            {
+                RefreshPlayerDisplay(player.Place, string.Empty);
+            }
+        }
+
         private void DetermineHolding(Player player)
         {
-            var toDetermine = new Card[player.Hand.Length + _board.Count];
-            player.Hand.CopyTo(toDetermine, 0);
-            _board.CopyTo(toDetermine, player.Hand.Length);
+            var toDetermine = player.Hand.ToList();
+            toDetermine.AddRange(_board);
 
             player.Holding = new Holding(toDetermine);
         }
@@ -552,8 +585,7 @@ namespace TexasHoldem.Client
                 if (_playerController.IsAllIn())
                 {
                     _activePlayers = _playerController.GetPlayingPlayersAmount();
-                    foreach (var player in _playerController.Players.Values)
-                        RefreshPlayerDisplay(player.Place, actionStr);
+                    _isGameInAllIn = true;
                     potsView.RefreshPots();
                     return;
                 }
